@@ -12,6 +12,8 @@ RTX 5090) only through the **LiteLLM** gateway on .101, and they email their rep
 | [patchwatch-agent](patchwatch-agent/) | Weekly patch plan: OS updates, security advisories, reboots, container image drift | Mondays 06:45 | `patchwatch` |
 | [labinventory](labinventory/) | Software inventory of every lab host over SSH (no LLM); feeds cvewatch + patchwatch | daily 05:30 | `labinventory` |
 
+Maintenance helper scripts (not agents) are in [ops](ops/), e.g. the one-at-a-time reboot run used after patching.
+
 Shared code for labwatch/cvewatch/patchwatch is in [lab-agents-common](lab-agents-common/) (one image,
 `localhost/labagents`). secnews is standalone (image `localhost/secnews`). LiteLLM registration is in
 [litellm](litellm/).
