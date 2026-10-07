@@ -1,0 +1,5 @@
+#!/bin/bash
+# Collect the lab software inventory now (SSH to every host in /opt/labagents/hosts.conf).
+# Must run as mcropsey (uses ~/.ssh/id_ed25519), not root.
+[ "$(id -u)" = 0 ] && exec sudo -u mcropsey "$0" "$@"
+exec python3 /opt/labagents/app/labinventory.py "$@"

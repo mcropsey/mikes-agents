@@ -1,0 +1,10 @@
+[Unit]
+Description=Weekly patch & image drift plan (patchwatch-agent)
+Wants=network-online.target
+After=network-online.target
+After=labinventory.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/podman run --rm --name patchwatch --network host --env-file /opt/labagents/labagents.env -v /opt/labagents/data:/data:z localhost/labagents:latest labagents.patchwatch
+TimeoutStartSec=45min

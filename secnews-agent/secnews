@@ -1,0 +1,4 @@
+#!/bin/bash
+# Run the cybersecurity news digest now. Extra args go to the agent: --hours N, --no-email, --to ADDR
+exec sudo podman run --rm --name secnews-manual --env-file /opt/secnews/secnews.env \
+  -v /opt/secnews/data:/data:Z localhost/secnews:latest "$@"

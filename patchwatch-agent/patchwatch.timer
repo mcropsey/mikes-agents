@@ -1,0 +1,9 @@
+[Unit]
+Description=Run Weekly patch & image drift plan (patchwatch-agent) (Mon *-*-* 06:45:00)
+
+[Timer]
+OnCalendar=Mon *-*-* 06:45:00 America/Chicago
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,10 @@
+[Unit]
+Description=Lab software inventory (SSH to lab hosts; feeds cvewatch/patchwatch)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=mcropsey
+ExecStart=/usr/bin/python3 /opt/labagents/app/labinventory.py
+TimeoutStartSec=30min

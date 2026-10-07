@@ -1,0 +1,7 @@
+FROM docker.io/library/python:3.12-slim
+RUN pip install --no-cache-dir openai==1.109.1 httpx==0.28.1
+COPY labagents /app/labagents
+WORKDIR /app
+ENV TZ=America/Chicago PYTHONUNBUFFERED=1
+VOLUME /data
+ENTRYPOINT ["python", "-m"]

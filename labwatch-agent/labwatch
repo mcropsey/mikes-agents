@@ -1,0 +1,4 @@
+#!/bin/bash
+# Run labwatch-agent now. Extra args go to the agent (try --help).
+exec sudo podman run --rm --name labwatch-manual --network host --env-file /opt/labagents/labagents.env \
+  -v /opt/labagents/data:/data:z localhost/labagents:latest labagents.labwatch "$@"

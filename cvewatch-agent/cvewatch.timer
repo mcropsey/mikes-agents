@@ -1,0 +1,9 @@
+[Unit]
+Description=Run CVE-to-lab matcher (cvewatch-agent) (*-*-* 06:30:00)
+
+[Timer]
+OnCalendar=*-*-* 06:30:00 America/Chicago
+Persistent=true
+
+[Install]
+WantedBy=timers.target

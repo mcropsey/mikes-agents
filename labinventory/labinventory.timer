@@ -1,0 +1,9 @@
+[Unit]
+Description=Collect the lab software inventory daily at 05:30
+
+[Timer]
+OnCalendar=*-*-* 05:30:00 America/Chicago
+Persistent=true
+
+[Install]
+WantedBy=timers.target

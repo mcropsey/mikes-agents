@@ -1,0 +1,9 @@
+[Unit]
+Description=Daily cybersecurity news digest (LLM via LiteLLM on .101)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/podman run --rm --name secnews --env-file /opt/secnews/secnews.env -v /opt/secnews/data:/data:Z localhost/secnews:latest
+TimeoutStartSec=30min

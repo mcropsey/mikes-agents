@@ -1,0 +1,9 @@
+[Unit]
+Description=Lab health briefing (labwatch-agent)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/podman run --rm --name labwatch --network host --env-file /opt/labagents/labagents.env -v /opt/labagents/data:/data:z localhost/labagents:latest labagents.labwatch
+TimeoutStartSec=45min

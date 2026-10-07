@@ -1,0 +1,8 @@
+# secrets and runtime data never go in the repo
+*.env
+!*.env.example
+*.key
+data/
+reports/
+__pycache__/
+*.pyc
