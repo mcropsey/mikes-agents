@@ -283,10 +283,11 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "mikes_agent_last_run_timestamp_seconds{agent=\"labwatch\"}",
+          "expr": "mikes_agent_last_run_timestamp_seconds{agent=\"labwatch\"} * 1000",
           "format": "time_series"
         }
-      ]
+      ],
+      "description": "Seconds metric x 1000: Grafana's dateTimeFromNow unit expects milliseconds."
     },
     {
       "type": "stat",
@@ -330,10 +331,11 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "mikes_agent_last_run_timestamp_seconds{agent=\"cvewatch\"}",
+          "expr": "mikes_agent_last_run_timestamp_seconds{agent=\"cvewatch\"} * 1000",
           "format": "time_series"
         }
-      ]
+      ],
+      "description": "Seconds metric x 1000: Grafana's dateTimeFromNow unit expects milliseconds."
     },
     {
       "type": "stat",
@@ -377,10 +379,11 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "mikes_agent_last_run_timestamp_seconds{agent=\"patchwatch\"}",
+          "expr": "mikes_agent_last_run_timestamp_seconds{agent=\"patchwatch\"} * 1000",
           "format": "time_series"
         }
-      ]
+      ],
+      "description": "Seconds metric x 1000: Grafana's dateTimeFromNow unit expects milliseconds."
     },
     {
       "type": "stat",
@@ -424,10 +427,11 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "mikes_agent_last_run_timestamp_seconds{agent=\"secnews\"}",
+          "expr": "mikes_agent_last_run_timestamp_seconds{agent=\"secnews\"} * 1000",
           "format": "time_series"
         }
-      ]
+      ],
+      "description": "Seconds metric x 1000: Grafana's dateTimeFromNow unit expects milliseconds."
     },
     {
       "type": "timeseries",
