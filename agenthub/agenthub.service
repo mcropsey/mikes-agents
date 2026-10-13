@@ -1,0 +1,16 @@
+[Unit]
+Description=mikes-agents report exporter (Prometheus metrics + Loki report logs)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /opt/agenthub/agenthub.py
+Restart=on-failure
+RestartSec=5
+Environment=AGENTHUB_PORT=9430
+Environment=AGENTHUB_LOKI=1
+Environment=AGENTHUB_POLL=20
+
+[Install]
+WantedBy=multi-user.target

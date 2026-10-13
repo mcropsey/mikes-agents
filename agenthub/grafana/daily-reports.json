@@ -1,0 +1,1142 @@
+{
+  "uid": "agent-daily-reports",
+  "title": "Agent Lab · Daily Reports",
+  "description": "All five mikes-agents (labwatch, cvewatch, patchwatch, secnews, servicemap): status, findings, and full report text. Data: Prometheus (agenthub exporter :9430) + Loki (report logs).",
+  "tags": [
+    "mikes-agents",
+    "reports"
+  ],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "1h",
+  "time": {
+    "from": "now-14d",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "labwatch · lab health",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "GREEN",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "YELLOW",
+                  "color": "yellow"
+                },
+                "2": {
+                  "text": "RED",
+                  "color": "red"
+                },
+                "3": {
+                  "text": "UNKNOWN",
+                  "color": "gray-dark"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "mikes_agent_status_code{agent=\"labwatch\"}",
+          "format": "time_series"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "cvewatch · affected findings",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "mikes_cvewatch_finding_count{agent=\"cvewatch\",verdict=\"affected\"}",
+          "format": "time_series"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "patchwatch · critical patches",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "mikes_patchwatch_priority_count{agent=\"patchwatch\",priority=\"critical\"}",
+          "format": "time_series"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "secnews · stories today",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "mikes_secnews_story_count{agent=\"secnews\"}",
+          "format": "time_series"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "labwatch · last run",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 0,
+        "y": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "dateTimeFromNow",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "textMode": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "mikes_agent_last_run_timestamp_seconds{agent=\"labwatch\"}",
+          "format": "time_series"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "cvewatch · last run",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 6,
+        "y": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "dateTimeFromNow",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "textMode": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "mikes_agent_last_run_timestamp_seconds{agent=\"cvewatch\"}",
+          "format": "time_series"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "patchwatch · last run",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 12,
+        "y": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "dateTimeFromNow",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "textMode": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "mikes_agent_last_run_timestamp_seconds{agent=\"patchwatch\"}",
+          "format": "time_series"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "secnews · last run",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 18,
+        "y": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "dateTimeFromNow",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "textMode": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "mikes_agent_last_run_timestamp_seconds{agent=\"secnews\"}",
+          "format": "time_series"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "cvewatch · findings by verdict",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 7
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "spanNulls": true,
+            "showPoints": "auto",
+            "pointSize": 5,
+            "stacking": {
+              "mode": "none"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "mikes_cvewatch_finding_count{verdict=\"affected\"}",
+          "format": "time_series",
+          "legendFormat": "affected"
+        },
+        {
+          "refId": "B",
+          "expr": "mikes_cvewatch_finding_count{verdict=\"possibly_affected\"}",
+          "format": "time_series",
+          "legendFormat": "possibly affected"
+        },
+        {
+          "refId": "C",
+          "expr": "mikes_cvewatch_finding_count{verdict=\"not_affected\"}",
+          "format": "time_series",
+          "legendFormat": "not affected"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "patchwatch · items by priority",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 7
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "spanNulls": true,
+            "showPoints": "auto",
+            "pointSize": 5,
+            "stacking": {
+              "mode": "none"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "mikes_patchwatch_priority_count{priority=\"critical\"}",
+          "format": "time_series",
+          "legendFormat": "critical"
+        },
+        {
+          "refId": "B",
+          "expr": "mikes_patchwatch_priority_count{priority=\"important\"}",
+          "format": "time_series",
+          "legendFormat": "important"
+        },
+        {
+          "refId": "C",
+          "expr": "mikes_patchwatch_priority_count{priority=\"moderate\"}",
+          "format": "time_series",
+          "legendFormat": "moderate"
+        },
+        {
+          "refId": "D",
+          "expr": "mikes_patchwatch_priority_count{priority=\"low\"}",
+          "format": "time_series",
+          "legendFormat": "low"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "secnews · stories by severity",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 15
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "spanNulls": true,
+            "showPoints": "auto",
+            "pointSize": 5,
+            "stacking": {
+              "mode": "none"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "mikes_secnews_story_count{agent=\"secnews\"}",
+          "format": "time_series",
+          "legendFormat": "total"
+        },
+        {
+          "refId": "B",
+          "expr": "mikes_secnews_story_severity{severity=\"critical\"}",
+          "format": "time_series",
+          "legendFormat": "critical"
+        },
+        {
+          "refId": "C",
+          "expr": "mikes_secnews_story_severity{severity=\"high\"}",
+          "format": "time_series",
+          "legendFormat": "high"
+        },
+        {
+          "refId": "D",
+          "expr": "mikes_secnews_story_severity{severity=\"medium\"}",
+          "format": "time_series",
+          "legendFormat": "medium"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "labwatch · status over time",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 15
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "spanNulls": true,
+            "showPoints": "auto",
+            "pointSize": 5,
+            "stacking": {
+              "mode": "none"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "mikes_agent_status_code{agent=\"labwatch\"}",
+          "format": "time_series",
+          "legendFormat": "status (0=green 1=yellow 2=red)"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "hours since last run (per agent)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 23
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "h",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "spanNulls": true,
+            "showPoints": "auto",
+            "pointSize": 5,
+            "stacking": {
+              "mode": "none"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(time() - mikes_agent_last_run_timestamp_seconds) / 3600",
+          "format": "time_series",
+          "legendFormat": "{{agent}}"
+        }
+      ]
+    },
+    {
+      "type": "logs",
+      "title": "labwatch · report log",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": {
+        "h": 14,
+        "w": 12,
+        "x": 0,
+        "y": 29
+      },
+      "options": {
+        "sortOrder": "Descending",
+        "showTime": true,
+        "wrapLogMessage": true,
+        "enableLogDetails": true,
+        "dedupStrategy": "none",
+        "pageSize": 200
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "{agent=\"labwatch\"}",
+          "queryType": "range"
+        }
+      ],
+      "links": [
+        {
+          "title": "Full labwatch report (HTML)",
+          "url": "http://192.168.1.98:9440/reports/labwatch/latest.html",
+          "targetBlank": true
+        },
+        {
+          "title": "All labwatch reports",
+          "url": "http://192.168.1.98:9440/reports/#labwatch",
+          "targetBlank": true
+        }
+      ]
+    },
+    {
+      "type": "logs",
+      "title": "cvewatch · report log",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": {
+        "h": 14,
+        "w": 12,
+        "x": 12,
+        "y": 29
+      },
+      "options": {
+        "sortOrder": "Descending",
+        "showTime": true,
+        "wrapLogMessage": true,
+        "enableLogDetails": true,
+        "dedupStrategy": "none",
+        "pageSize": 200
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "{agent=\"cvewatch\"}",
+          "queryType": "range"
+        }
+      ],
+      "links": [
+        {
+          "title": "Full cvewatch report (HTML)",
+          "url": "http://192.168.1.98:9440/reports/cvewatch/latest.html",
+          "targetBlank": true
+        },
+        {
+          "title": "All cvewatch reports",
+          "url": "http://192.168.1.98:9440/reports/#cvewatch",
+          "targetBlank": true
+        }
+      ]
+    },
+    {
+      "type": "logs",
+      "title": "patchwatch · report log",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": {
+        "h": 14,
+        "w": 12,
+        "x": 0,
+        "y": 43
+      },
+      "options": {
+        "sortOrder": "Descending",
+        "showTime": true,
+        "wrapLogMessage": true,
+        "enableLogDetails": true,
+        "dedupStrategy": "none",
+        "pageSize": 200
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "{agent=\"patchwatch\"}",
+          "queryType": "range"
+        }
+      ],
+      "links": [
+        {
+          "title": "Full patchwatch report (HTML)",
+          "url": "http://192.168.1.98:9440/reports/patchwatch/latest.html",
+          "targetBlank": true
+        },
+        {
+          "title": "All patchwatch reports",
+          "url": "http://192.168.1.98:9440/reports/#patchwatch",
+          "targetBlank": true
+        }
+      ]
+    },
+    {
+      "type": "logs",
+      "title": "secnews · report log",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": {
+        "h": 14,
+        "w": 12,
+        "x": 12,
+        "y": 43
+      },
+      "options": {
+        "sortOrder": "Descending",
+        "showTime": true,
+        "wrapLogMessage": true,
+        "enableLogDetails": true,
+        "dedupStrategy": "none",
+        "pageSize": 200
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "{agent=\"secnews\"}",
+          "queryType": "range"
+        }
+      ],
+      "links": [
+        {
+          "title": "Full secnews report (HTML)",
+          "url": "http://192.168.1.98:9440/reports/secnews/latest.html",
+          "targetBlank": true
+        },
+        {
+          "title": "All secnews reports",
+          "url": "http://192.168.1.98:9440/reports/#secnews",
+          "targetBlank": true
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "servicemap · changes since last map",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 57
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "mikes_servicemap_changes{agent=\"servicemap\",kind=\"total\"}",
+          "format": "time_series"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "servicemap · components",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 57
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "textMode": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "mikes_servicemap_components{agent=\"servicemap\"}",
+          "format": "time_series"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "servicemap · AI components",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 57
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "textMode": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "mikes_servicemap_ai_components{agent=\"servicemap\"}",
+          "format": "time_series"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "servicemap · last run",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 57
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "dateTimeFromNow"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "textMode": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "mikes_agent_last_run_timestamp_seconds{agent=\"servicemap\"} * 1000",
+          "format": "time_series"
+        }
+      ]
+    },
+    {
+      "type": "logs",
+      "title": "servicemap · report log",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": {
+        "h": 14,
+        "w": 12,
+        "x": 0,
+        "y": 61
+      },
+      "options": {
+        "sortOrder": "Descending",
+        "showTime": true,
+        "wrapLogMessage": true,
+        "enableLogDetails": true,
+        "dedupStrategy": "none",
+        "pageSize": 200
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "{agent=\"servicemap\"}",
+          "queryType": "range"
+        }
+      ],
+      "links": [
+        {
+          "title": "Full servicemap report (HTML)",
+          "url": "http://192.168.1.98:9440/reports/servicemap/latest.html",
+          "targetBlank": true
+        },
+        {
+          "title": "Interactive service map",
+          "url": "http://192.168.1.98:9440/",
+          "targetBlank": true
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "title": "Full reports",
+      "gridPos": {
+        "h": 14,
+        "w": 12,
+        "x": 12,
+        "y": 61
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "Every report each agent has written, newest first, with its headline: **[http://192.168.1.98:9440/reports/](http://192.168.1.98:9440/reports/)**\n\n| Agent | Latest report | All runs |\n|---|---|---|\n| labwatch | [latest.html](http://192.168.1.98:9440/reports/labwatch/latest.html) | [history](http://192.168.1.98:9440/reports/#labwatch) |\n| cvewatch | [latest.html](http://192.168.1.98:9440/reports/cvewatch/latest.html) | [history](http://192.168.1.98:9440/reports/#cvewatch) |\n| patchwatch | [latest.html](http://192.168.1.98:9440/reports/patchwatch/latest.html) | [history](http://192.168.1.98:9440/reports/#patchwatch) |\n| secnews | [latest.html](http://192.168.1.98:9440/reports/secnews/latest.html) | [history](http://192.168.1.98:9440/reports/#secnews) |\n| servicemap | [latest.html](http://192.168.1.98:9440/reports/servicemap/latest.html) | [history](http://192.168.1.98:9440/reports/#servicemap) |\n\nService map: [interactive page](http://192.168.1.98:9440/) · [Lab Service Map dashboard](/d/lab-service-map)\n\n_Served by `servicemap-web` on .98 (LAN only). Each report-log panel's title menu also links to its full report._"
+      }
+    }
+  ],
+  "links": [
+    {
+      "title": "All agent reports",
+      "type": "link",
+      "url": "http://192.168.1.98:9440/reports/",
+      "targetBlank": true,
+      "icon": "doc"
+    },
+    {
+      "title": "Service map",
+      "type": "link",
+      "url": "http://192.168.1.98:9440/",
+      "targetBlank": true,
+      "icon": "external link"
+    }
+  ]
+}

@@ -14,6 +14,8 @@ RTX 5090) only through the **LiteLLM** gateway on .101, and they email their rep
 | [servicemap-agent](servicemap-agent/) | Maps every service, timer, cron job, container, k8s workload and AI agent on the hosts Grafana monitors; page on .98:9440 + Grafana, published to cropsey-lab | daily 05:40 | `servicemap` |
 
 Maintenance helper scripts (not agents) are in [ops](ops/), e.g. the one-at-a-time reboot run used after patching.
+[agenthub](agenthub/) exports every agent's latest report to Prometheus + Loki for the Grafana dashboard
+**Agent Lab · Daily Reports**.
 
 Shared code for labwatch/cvewatch/patchwatch is in [lab-agents-common](lab-agents-common/) (one image,
 `localhost/labagents`). secnews is standalone (image `localhost/secnews`). LiteLLM registration is in
@@ -79,6 +81,8 @@ flowchart LR
 | `/etc/systemd/system/` | `<name>.service` + `<name>.timer` for each |
 
 Reports: `/opt/secnews/data/reports/latest.html` and `/opt/labagents/data/reports/<agent>/latest.html`.
+Browse them all at **http://192.168.1.98:9440/reports/** (LAN only; served by `servicemap-web`, linked from Grafana and
+from the footer of the cropseyit.com page on rasp5). In Grafana: *Agent Lab · Daily Reports* and *Lab Service Map*.
 
 ## Install everything from scratch
 

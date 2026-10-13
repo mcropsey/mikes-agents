@@ -15,7 +15,8 @@ everything that runs there, has the local model label each component, and publis
                                                                     ──► data/servicemap/site/*
   3  servicemap_publish.sh  (host, as mcropsey) ──git push──► cropsey-lab/service-map/ (only if the map changed)
 
-servicemap-web.service  python http.server :9440 ──► data/servicemap/site/  (page, SVGs, /metrics)
+servicemap-web.service  servicemap_web.py :9440 ──► data/servicemap/site/  (page, SVGs, /metrics)
+                                              └─► /reports/: every agent's reports (read-only bind mounts)
 ```
 
 ## What it produces
@@ -26,6 +27,10 @@ servicemap-web.service  python http.server :9440 ──► data/servicemap/site/
 | `fleet-{dark,light}.svg`, `ai-map-{dark,light}.svg` | Standalone images of the two diagrams (Grafana Text panels can show `<img>`; they strip iframes) |
 | `metrics` | Prometheus exposition: `servicemap_component_info`, `servicemap_edge_info`, `servicemap_components`, `servicemap_hosts`, `servicemap_changes`, `servicemap_last_run_timestamp_seconds` |
 | `README.md`, `servicemap.json` | GitHub view (mermaid diagram + tables) and the published model |
+
+**`/reports/`** on the same server lists every agent's reports (labwatch, cvewatch, patchwatch, secnews, servicemap),
+newest first with each run's status and headline, linking to `/reports/<agent>/<stamp>.html|json`. The report folders
+are bind-mounted read-only into the sandboxed (`DynamicUser`) service, so `/opt/secnews` stays root-only.
 
 Also: `data/servicemap/history/<stamp>.json` (one per run), `data/reports/servicemap/` (like the other agents), and an
 email **only when something changed** (no email on the first run or on quiet days).
@@ -66,7 +71,7 @@ seconds). If the model is unavailable the rule-based labels are used and the pag
 ```bash
 cd ~/mikes-agents/servicemap-agent
 sudo install -m 644 servicemap.py /opt/labagents/app/labagents/servicemap.py
-sudo install -m 755 servicemap_collect.py servicemap_publish.sh /opt/labagents/app/
+sudo install -m 755 servicemap_collect.py servicemap_publish.sh servicemap_web.py /opt/labagents/app/
 sudo install -m 755 servicemap /usr/local/bin/
 sudo install -m 644 servicemap.service servicemap.timer servicemap-web.service /etc/systemd/system/
 (cd /opt/labagents/app && sudo podman build -t localhost/labagents:latest .)
@@ -84,12 +89,14 @@ table of every component and a dependency table, plus a link to the interactive 
 `/opt/monitoring/grafana/dashboards/Lab Service Map/` (folder "Lab Service Map", `/d/lab-service-map`, datasource uid `prometheus`).
 
 The stat and table panels read Prometheus job `servicemap` in `/opt/monitoring/prometheus/config/prometheus.yml`
-(`honor_labels` keeps the map's own `host` label; reload with `curl -X POST localhost:9090/-/reload`):
+(`honor_labels` keeps the map's own `host` label; `fallback_scrape_protocol` was needed while the page was served by
+`python -m http.server`, which sent `application/octet-stream`; reload with `curl -X POST localhost:9090/-/reload`):
 
 ```yaml
   - job_name: servicemap
     scrape_interval: 5m
     honor_labels: true
+    fallback_scrape_protocol: PrometheusText0.0.4
     static_configs:
       - targets: ["localhost:9440"]
 ```
