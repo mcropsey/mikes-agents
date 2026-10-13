@@ -76,7 +76,7 @@ sudo install -m 755 servicemap /usr/local/bin/
 sudo install -m 644 servicemap.service servicemap.timer servicemap-web.service /etc/systemd/system/
 (cd /opt/labagents/app && sudo podman build -t localhost/labagents:latest .)
 # LiteLLM key: see ../litellm/README.md (alias servicemap-agent, env var SERVICEMAP_KEY)
-sudo firewall-cmd --permanent --add-port=9440/tcp && sudo firewall-cmd --reload
+sudo firewall-cmd --add-port=9440/tcp && sudo firewall-cmd --permanent --add-port=9440/tcp   # never --reload on .98
 sudo systemctl daemon-reload && sudo systemctl enable --now servicemap-web.service servicemap.timer
 servicemap            # first run: collect + label + publish
 ```

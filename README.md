@@ -87,13 +87,17 @@ from the footer of the cropseyit.com page on rasp5). In Grafana: *Agent Lab · D
 ## Install everything from scratch
 
 Prerequisites on .98: Rocky 9, rootful podman, `sudo`, passwordless SSH from `mcropsey` to every lab host
-with `sudo -n` there (only labinventory needs that). On .101: LiteLLM in the `litellm` podman container.
+with `sudo -n` there (labinventory and servicemap need that). For servicemap's GitHub publishing: a clone of
+`cropsey-lab` at `~/cropsey-lab` that can push (HTTPS token in `~/.git-credentials`). On .101: LiteLLM in the `litellm` podman container.
 A Gmail app password (https://myaccount.google.com/apppasswords, needs 2-Step Verification).
 
 1. **LiteLLM keys** (on .101): see [litellm/README.md](litellm/README.md). One key per agent.
 2. **secnews**: see [secnews-agent/README.md](secnews-agent/README.md).
 3. **Shared lab-agents image + env**: see [lab-agents-common/README.md](lab-agents-common/README.md).
 4. **labinventory**, then **labwatch**, **cvewatch**, **patchwatch**: see each folder's README.
+5. **servicemap-agent** (map page on :9440, reports listing, Grafana dashboard, Prometheus job, GitHub publishing):
+   see [servicemap-agent/README.md](servicemap-agent/README.md).
+6. **agenthub** (reports into Prometheus + Loki, *Agent Lab · Daily Reports* dashboard): see [agenthub/README.md](agenthub/README.md).
 
 Quick version, run from a checkout of this repo on .98:
 
@@ -101,7 +105,7 @@ Quick version, run from a checkout of this repo on .98:
 # shared image
 sudo mkdir -p /opt/labagents/app/labagents /opt/labagents/data && sudo chown mcropsey: /opt/labagents/data
 sudo cp lab-agents-common/labagents/*.py labwatch-agent/labwatch.py cvewatch-agent/cvewatch.py \
-        patchwatch-agent/patchwatch.py /opt/labagents/app/labagents/
+        patchwatch-agent/patchwatch.py servicemap-agent/servicemap.py /opt/labagents/app/labagents/
 sudo cp lab-agents-common/Containerfile /opt/labagents/app/
 sudo install -m 600 lab-agents-common/labagents.env.example /opt/labagents/labagents.env   # fill in keys + SMTP_PASS
 sudo podman build -t localhost/labagents:latest -f /opt/labagents/app/Containerfile /opt/labagents/app
@@ -120,7 +124,31 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now labinventory.timer labwatch.timer cvewatch.timer patchwatch.timer
 
 labinventory && labwatch --no-email && cvewatch --no-email && patchwatch --no-email   # smoke test
+
+# servicemap: collector, publisher, web server (:9440), wrapper, units
+sudo install -m 755 servicemap-agent/servicemap_collect.py servicemap-agent/servicemap_publish.sh \
+        servicemap-agent/servicemap_web.py /opt/labagents/app/
+sudo install -m 755 servicemap-agent/servicemap /usr/local/bin/
+sudo cp servicemap-agent/servicemap.service servicemap-agent/servicemap.timer servicemap-agent/servicemap-web.service \
+        /etc/systemd/system/
+# open :9440 WITHOUT firewall-cmd --reload (a reload on .98/.101/.102 can break container networking)
+sudo firewall-cmd --add-port=9440/tcp && sudo firewall-cmd --permanent --add-port=9440/tcp
+
+# agenthub: report exporter on :9430
+sudo mkdir -p /opt/agenthub && sudo install -m 755 agenthub/agenthub.py /opt/agenthub/
+sudo cp agenthub/agenthub.service /etc/systemd/system/
+
+sudo systemctl daemon-reload
+sudo systemctl enable --now servicemap-web.service agenthub.service servicemap.timer
+servicemap                                                                             # first map + publish
+
+# Grafana + Prometheus on .98 (see servicemap-agent/README.md and agenthub/README.md):
+#   dashboards -> /opt/monitoring/grafana/dashboards/{Lab Service Map,Agent Lab}/
+#   Prometheus jobs `agenthub` (localhost:9430) and `servicemap` (localhost:9440) in prometheus/config/prometheus.yml
 ```
+
+Not in this repo, kept with the monitoring stack on .98: the Prometheus config and the rest of the Grafana dashboards
+(`/opt/monitoring`, generator `gen_dashboards.py`; see `cropsey-lab/lab-inventory.md`).
 
 ## Operating
 

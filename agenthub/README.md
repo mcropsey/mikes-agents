@@ -36,5 +36,26 @@ agent's full HTML report, and the **Full reports** panel and the dashboard links
 | `agenthub.py` | `/opt/agenthub/agenthub.py` |
 | `agenthub.service` | `/etc/systemd/system/agenthub.service` (`AGENTHUB_PORT=9430`, `AGENTHUB_LOKI=1`, `AGENTHUB_POLL=20`) |
 
+## Install (on .98)
+
+```bash
+sudo mkdir -p /opt/agenthub && sudo install -m 755 agenthub.py /opt/agenthub/
+sudo install -m 644 agenthub.service /etc/systemd/system/ && sudo systemctl daemon-reload
+sudo systemctl enable --now agenthub.service
+sudo install -d -o 472 -g root "/opt/monitoring/grafana/dashboards/Agent Lab"
+sudo install -m 644 grafana/daily-reports.json "/opt/monitoring/grafana/dashboards/Agent Lab/"
+```
+
+Prometheus scrape job in `/opt/monitoring/prometheus/config/prometheus.yml`, then `curl -X POST localhost:9090/-/reload`:
+
+```yaml
+  - job_name: agenthub
+    static_configs:
+      - targets: ["localhost:9430"]
+        labels: {host: hv-rocky-linux-1, job: agenthub}
+```
+
+Loki needs nothing extra: agenthub pushes to `http://localhost:3100/loki/api/v1/push` on the same host.
+
 Add an agent: put its report folder in `REPORT_DIRS`, add a branch to `metrics_for()` and `loki_lines()`, then
 `sudo install -m 755 agenthub.py /opt/agenthub/ && sudo systemctl restart agenthub`.
