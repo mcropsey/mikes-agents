@@ -25,6 +25,7 @@ The guardrail opt-out is read only from admin-set key/team metadata. A caller ca
 | `labwatch-agent` | Lab Health Watch (labwatch-agent) | `LABWATCH_KEY` in `/opt/labagents/labagents.env` |
 | `cvewatch-agent` | CVE-to-Lab Matcher (cvewatch-agent) | `CVEWATCH_KEY` |
 | `patchwatch-agent` | Patch & Image Drift Watch (patchwatch-agent) | `PATCHWATCH_KEY` |
+| `servicemap-agent` | Lab Service Map (servicemap-agent) | `SERVICEMAP_KEY` (registered 2026-10-13) |
 
 ## Create or rotate a key
 

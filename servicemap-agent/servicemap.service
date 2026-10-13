@@ -1,0 +1,14 @@
+[Unit]
+Description=Lab service map (servicemap-agent): SSH inventory -> LLM labels -> Grafana page + GitHub
+Wants=network-online.target
+After=network-online.target
+After=labinventory.service
+
+[Service]
+Type=oneshot
+# 1) collect over SSH as mcropsey (needs its SSH key), 2) label + render in the labagents image,
+# 3) publish to github.com/mcropsey/cropsey-lab/service-map when the map changed
+ExecStart=/usr/sbin/runuser -u mcropsey -- /usr/bin/python3 /opt/labagents/app/servicemap_collect.py
+ExecStart=/usr/bin/podman run --rm --name servicemap --network host --env-file /opt/labagents/labagents.env -v /opt/labagents/data:/data:z localhost/labagents:latest labagents.servicemap
+ExecStart=/usr/sbin/runuser -u mcropsey -- /opt/labagents/app/servicemap_publish.sh
+TimeoutStartSec=45min

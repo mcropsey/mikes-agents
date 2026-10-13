@@ -11,6 +11,7 @@ RTX 5090) only through the **LiteLLM** gateway on .101, and they email their rep
 | [cvewatch-agent](cvewatch-agent/) | Matches newly published CVEs against the software in the lab; emails only if affected | daily 06:30 | `cvewatch` |
 | [patchwatch-agent](patchwatch-agent/) | Weekly patch plan: OS updates, security advisories, reboots, container image drift | Mondays 06:45 | `patchwatch` |
 | [labinventory](labinventory/) | Software inventory of every lab host over SSH (no LLM); feeds cvewatch + patchwatch | daily 05:30 | `labinventory` |
+| [servicemap-agent](servicemap-agent/) | Maps every service, timer, cron job, container, k8s workload and AI agent on the hosts Grafana monitors; page on .98:9440 + Grafana, published to cropsey-lab | daily 05:40 | `servicemap` |
 
 Maintenance helper scripts (not agents) are in [ops](ops/), e.g. the one-at-a-time reboot run used after patching.
 
@@ -28,12 +29,15 @@ flowchart LR
     T --> CW[cvewatch-agent]
     T --> PW[patchwatch-agent]
     T --> INV[labinventory]
+    T --> SM[servicemap-agent]
     INV -->|inventory JSON| CW
     INV -->|inventory JSON| PW
     PROM[(Prometheus / Loki / Alertmanager)] -->|PromQL / LogQL tools| LW
   end
   INV -->|ssh + sudo -n| HOSTS[lab hosts .75 .76 .85 .98-.105]
-  SN & LW & CW & PW -->|/v1/chat/completions, own key each| LL[LiteLLM :4000 on .101]
+  SM -->|ssh + sudo -n| HOSTS
+  SM -->|git push| GH[(github cropsey-lab/service-map)]
+  SN & LW & CW & PW & SM -->|/v1/chat/completions, own key each| LL[LiteLLM :4000 on .101]
   LL -->|qwen3.8-27b only| LMS[LM Studio on .194, RTX 5090]
   SN -->|RSS + KEV| NET[(internet feeds)]
   CW -->|NVD API + KEV| NET
@@ -43,6 +47,7 @@ flowchart LR
 
 ```
  05:30 labinventory ──ssh──► 11 lab hosts ──► /opt/labagents/data/inventory/latest.json
+ 05:40 servicemap   ──ssh──► Grafana's hosts ──► LLM labels ──► :9440 page + Grafana + GitHub
  06:00 secnews  ─┐
  06:15 labwatch ─┼─► LiteLLM (.101:4000) ──► LM Studio qwen3.8-27b (.194, RTX 5090)
  06:30 cvewatch ─┤        one virtual key + agent-registry entry per agent
@@ -70,7 +75,7 @@ flowchart LR
 |---|---|
 | `/opt/secnews/` | `app/` (secnews.py, Containerfile), `secnews.env` (600), `data/reports/` |
 | `/opt/labagents/` | `app/labagents/` (common + agent modules), `app/labinventory.py`, `app/Containerfile`, `hosts.conf`, `labagents.env` (600), `data/inventory/`, `data/reports/<agent>/` |
-| `/usr/local/bin/` | `secnews`, `labwatch`, `cvewatch`, `patchwatch`, `labinventory` |
+| `/usr/local/bin/` | `secnews`, `labwatch`, `cvewatch`, `patchwatch`, `labinventory`, `servicemap` |
 | `/etc/systemd/system/` | `<name>.service` + `<name>.timer` for each |
 
 Reports: `/opt/secnews/data/reports/latest.html` and `/opt/labagents/data/reports/<agent>/latest.html`.

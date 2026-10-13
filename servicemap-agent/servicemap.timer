@@ -1,0 +1,9 @@
+[Unit]
+Description=Run the lab service map (servicemap-agent) daily at 05:40
+
+[Timer]
+OnCalendar=*-*-* 05:40:00 America/Chicago
+Persistent=true
+
+[Install]
+WantedBy=timers.target
