@@ -80,16 +80,18 @@ servicemap            # first run: collect + label + publish
 
 [`grafana/lab-service-map.json`](grafana/lab-service-map.json) is a provisioned dashboard ("Lab Service Map"): stat tiles,
 the fleet map and AI map images (Text panels with `<img>`, which work with Grafana's default HTML sanitizer), a filterable
-table of every component and a dependency table, plus a link to the interactive page. To install it, copy it into a new
-folder under `/opt/monitoring/grafana/dashboards/` (each subfolder becomes a Grafana folder).
+table of every component and a dependency table, plus a link to the interactive page. Installed 2026-10-13 at
+`/opt/monitoring/grafana/dashboards/Lab Service Map/` (folder "Lab Service Map", `/d/lab-service-map`, datasource uid `prometheus`).
 
-The stat and table panels read Prometheus; add this scrape job to `/opt/monitoring/prometheus/prometheus.yml` and reload:
+The stat and table panels read Prometheus job `servicemap` in `/opt/monitoring/prometheus/config/prometheus.yml`
+(`honor_labels` keeps the map's own `host` label; reload with `curl -X POST localhost:9090/-/reload`):
 
 ```yaml
   - job_name: servicemap
     scrape_interval: 5m
+    honor_labels: true
     static_configs:
-      - targets: ["192.168.1.98:9440"]
+      - targets: ["localhost:9440"]
 ```
 
 ## Operate

@@ -16,16 +16,7 @@
     "to": "now"
   },
   "templating": {
-    "list": [
-      {
-        "name": "ds",
-        "label": "Prometheus",
-        "type": "datasource",
-        "query": "prometheus",
-        "hide": 2,
-        "current": {}
-      }
-    ]
+    "list": []
   },
   "links": [
     {
@@ -44,7 +35,7 @@
       "description": "",
       "datasource": {
         "type": "prometheus",
-        "uid": "${ds}"
+        "uid": "prometheus"
       },
       "gridPos": {
         "x": 0,
@@ -57,7 +48,7 @@
           "refId": "A",
           "datasource": {
             "type": "prometheus",
-            "uid": "${ds}"
+            "uid": "prometheus"
           },
           "expr": "servicemap_hosts{state=\"ok\"}",
           "instant": true
@@ -91,7 +82,7 @@
       "description": "",
       "datasource": {
         "type": "prometheus",
-        "uid": "${ds}"
+        "uid": "prometheus"
       },
       "gridPos": {
         "x": 4,
@@ -104,7 +95,7 @@
           "refId": "A",
           "datasource": {
             "type": "prometheus",
-            "uid": "${ds}"
+            "uid": "prometheus"
           },
           "expr": "count(servicemap_component_info)",
           "instant": true
@@ -138,7 +129,7 @@
       "description": "",
       "datasource": {
         "type": "prometheus",
-        "uid": "${ds}"
+        "uid": "prometheus"
       },
       "gridPos": {
         "x": 8,
@@ -151,7 +142,7 @@
           "refId": "A",
           "datasource": {
             "type": "prometheus",
-            "uid": "${ds}"
+            "uid": "prometheus"
           },
           "expr": "count(servicemap_component_info{ai=\"true\"})",
           "instant": true
@@ -185,7 +176,7 @@
       "description": "",
       "datasource": {
         "type": "prometheus",
-        "uid": "${ds}"
+        "uid": "prometheus"
       },
       "gridPos": {
         "x": 12,
@@ -198,7 +189,7 @@
           "refId": "A",
           "datasource": {
             "type": "prometheus",
-            "uid": "${ds}"
+            "uid": "prometheus"
           },
           "expr": "count(servicemap_component_info{runtime=~\"docker|podman|root podman\"})",
           "instant": true
@@ -232,7 +223,7 @@
       "description": "",
       "datasource": {
         "type": "prometheus",
-        "uid": "${ds}"
+        "uid": "prometheus"
       },
       "gridPos": {
         "x": 16,
@@ -245,7 +236,7 @@
           "refId": "A",
           "datasource": {
             "type": "prometheus",
-            "uid": "${ds}"
+            "uid": "prometheus"
           },
           "expr": "servicemap_changes",
           "instant": true
@@ -279,7 +270,7 @@
       "description": "",
       "datasource": {
         "type": "prometheus",
-        "uid": "${ds}"
+        "uid": "prometheus"
       },
       "gridPos": {
         "x": 20,
@@ -292,7 +283,7 @@
           "refId": "A",
           "datasource": {
             "type": "prometheus",
-            "uid": "${ds}"
+            "uid": "prometheus"
           },
           "expr": "time() - servicemap_last_run_timestamp_seconds",
           "instant": true
@@ -358,7 +349,7 @@
       "description": "",
       "datasource": {
         "type": "prometheus",
-        "uid": "${ds}"
+        "uid": "prometheus"
       },
       "gridPos": {
         "x": 0,
@@ -371,7 +362,7 @@
           "refId": "A",
           "datasource": {
             "type": "prometheus",
-            "uid": "${ds}"
+            "uid": "prometheus"
           },
           "expr": "servicemap_component_info",
           "instant": true,
@@ -434,7 +425,7 @@
       "description": "",
       "datasource": {
         "type": "prometheus",
-        "uid": "${ds}"
+        "uid": "prometheus"
       },
       "gridPos": {
         "x": 0,
@@ -447,7 +438,7 @@
           "refId": "A",
           "datasource": {
             "type": "prometheus",
-            "uid": "${ds}"
+            "uid": "prometheus"
           },
           "expr": "servicemap_edge_info",
           "instant": true,
