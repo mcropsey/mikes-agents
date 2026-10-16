@@ -1,4 +1,4 @@
-"""patchwatch-agent: weekly "what to update and why" report for the lab.
+"""patchwatch-agent: daily "what to update and why" report for the lab.
 
 Uses the lab inventory (pending dnf/apt updates, Rocky security advisories with CVEs, reboot-needed flags,
 broken repos) and checks every running container / k8s image against its registry to see whether the

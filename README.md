@@ -9,7 +9,7 @@ RTX 5090) only through the **LiteLLM** gateway on .101, and they email their rep
 | [secnews-agent](secnews-agent/) | Cybersecurity news briefing from 9 RSS feeds + CISA KEV | daily 06:00 | `secnews` |
 | [labwatch-agent](labwatch-agent/) | Lab health briefing; investigates Prometheus/Loki with its own tool calls | daily 06:15 | `labwatch` |
 | [cvewatch-agent](cvewatch-agent/) | Matches newly published CVEs against the software in the lab; emails only if affected | daily 06:30 | `cvewatch` |
-| [patchwatch-agent](patchwatch-agent/) | Weekly patch plan: OS updates, security advisories, reboots, container image drift | Mondays 06:45 | `patchwatch` |
+| [patchwatch-agent](patchwatch-agent/) | Daily patch plan: OS updates, security advisories, reboots, container image drift | daily 06:45 | `patchwatch` |
 | [labinventory](labinventory/) | Software inventory of every lab host over SSH (no LLM); feeds cvewatch + patchwatch | daily 05:30 | `labinventory` |
 | [servicemap-agent](servicemap-agent/) | Maps every service, timer, cron job, container, k8s workload and AI agent on the hosts Grafana monitors; page on .98:9440 + Grafana, published to cropsey-lab | daily 05:40 | `servicemap` |
 
@@ -53,7 +53,7 @@ flowchart LR
  06:00 secnews  ─┐
  06:15 labwatch ─┼─► LiteLLM (.101:4000) ──► LM Studio qwen3.8-27b (.194, RTX 5090)
  06:30 cvewatch ─┤        one virtual key + agent-registry entry per agent
- Mon   patchwatch┘
+ 06:45 patchwatch┘
         └──► reports saved on .98 + emailed via smtp.gmail.com:465
 ```
 
@@ -62,7 +62,8 @@ flowchart LR
 - **Local model only, one model only.** Every key is restricted to `qwen3.8-27b`. Calling other LM Studio
   models makes them load next to qwen3.8 and pushes it onto the CPU (~0.3 tok/s).
 - **Run before the workday.** The GPU is used interactively 08:00-22:00, so all schedules finish before 07:00.
-  A typical morning uses the GPU for ~5 minutes in total (secnews ~1.5 min, labwatch ~1.5 min, cvewatch ~1.5 min).
+  A typical morning uses the GPU for ~8 minutes in total (secnews ~1.5 min, labwatch ~1.5 min, cvewatch ~1.5 min,
+  patchwatch ~3.5 min).
 - **One LiteLLM key and one agent-registry entry per agent**, so spend and traffic are attributed per agent
   on the LiteLLM *Agents* page. Keys allow 1 request in flight and 30 rpm.
 - **Guardrail opt-out.** LiteLLM's `basic-safety-filter` content filter (on by default for all traffic) blocks

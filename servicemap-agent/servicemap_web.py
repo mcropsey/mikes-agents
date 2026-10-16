@@ -26,7 +26,7 @@ GRAFANA = os.environ.get("SERVICEMAP_GRAFANA", "http://192.168.1.98:3000")
 ABOUT = {
     "labwatch": ("Lab health briefing", "daily 06:15"),
     "cvewatch": ("CVE-to-lab matcher", "daily 06:30"),
-    "patchwatch": ("Patch & image drift plan", "Mondays 06:45"),
+    "patchwatch": ("Patch & image drift plan", "daily 06:45"),
     "secnews": ("Cybersecurity news digest", "daily 06:00"),
     "servicemap": ("Lab service map", "daily 05:40"),
 }
