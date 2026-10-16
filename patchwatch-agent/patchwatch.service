@@ -1,5 +1,5 @@
 [Unit]
-Description=Weekly patch & image drift plan (patchwatch-agent)
+Description=Daily patch & image drift plan (patchwatch-agent)
 Wants=network-online.target
 After=network-online.target
 After=labinventory.service

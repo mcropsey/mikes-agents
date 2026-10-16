@@ -1,9 +1,9 @@
-# patchwatch-agent: weekly patch and image-drift plan
+# patchwatch-agent: daily patch and image-drift plan
 
 Part of [mikes-agents](../README.md). Uses [lab-agents-common](../lab-agents-common/) and the inventory from
 [labinventory](../labinventory/).
 
-Every **Monday at 06:45** it emails a prioritised "what to update and why" plan for the whole lab:
+Every **day at 06:45** it emails a prioritised "what to update and why" plan for the whole lab:
 
 - pending OS updates per host (dnf / apt)
 - Rocky security advisories (RLSA) by severity, with their CVEs, merged across hosts
@@ -58,7 +58,7 @@ searxng, postgres (×2), the Twingate connector.
 |---|---|
 | `patchwatch.py` | `/opt/labagents/app/labagents/patchwatch.py` (in the image) |
 | `patchwatch` | `/usr/local/bin/patchwatch` |
-| `patchwatch.service` / `.timer` | `/etc/systemd/system/` (Mondays 06:45, `After=labinventory.service`) |
+| `patchwatch.service` / `.timer` | `/etc/systemd/system/` (daily 06:45, `After=labinventory.service`) |
 
 ## Install
 

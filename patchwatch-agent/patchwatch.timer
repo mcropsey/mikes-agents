@@ -1,8 +1,8 @@
 [Unit]
-Description=Run Weekly patch & image drift plan (patchwatch-agent) (Mon *-*-* 06:45:00)
+Description=Run Daily patch & image drift plan (patchwatch-agent) (*-*-* 06:45:00)
 
 [Timer]
-OnCalendar=Mon *-*-* 06:45:00 America/Chicago
+OnCalendar=*-*-* 06:45:00 America/Chicago
 Persistent=true
 
 [Install]
