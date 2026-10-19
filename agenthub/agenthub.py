@@ -13,6 +13,12 @@ REPORT_DIRS = {
     "patchwatch": "/opt/labagents/data/reports/patchwatch",
     "secnews": "/opt/secnews/data/reports",
     "servicemap": "/opt/labagents/data/reports/servicemap",
+    # added 2026-10-19
+    "alertwatch": "/opt/labagents/data/reports/alertwatch",
+    "weekrollup": "/opt/labagents/data/reports/weekrollup",
+    "patchrun": "/opt/labagents/data/reports/patchrun",
+    "agentdemo": "/opt/labagents/data/reports/agentdemo",
+    "llmredteam": "/opt/labagents/data/reports/llmredteam",
 }
 PORT = int(os.environ.get("AGENTHUB_PORT", "9430"))
 LOKI_URL = os.environ.get("AGENTHUB_LOKI_URL", "http://localhost:3100/loki/api/v1/push")
@@ -42,6 +48,20 @@ HELP = {
     "mikes_servicemap_components": "servicemap: notable components (excl. OS baseline)",
     "mikes_servicemap_ai_components": "servicemap: components that use or serve an LLM",
     "mikes_servicemap_changes": "servicemap: changes since the previous map by kind (kind=total for all)",
+    "mikes_alertwatch_status_code": "alertwatch triage status: 0 green, 1 yellow, 2 red, 3 unknown",
+    "mikes_alertwatch_alert_count": "alertwatch: alerts in the latest triage (kind=total|real|false)",
+    "mikes_weekrollup_open_items": "weekrollup: items still open / recurring this week",
+    "mikes_weekrollup_quality_issues": "weekrollup: agent quality-check notes by severity (severity=total for all)",
+    "mikes_patchrun_status_code": "patchrun status: 0 ok, 1 attention, 2 failed, 3 unknown",
+    "mikes_patchrun_hosts": "patchrun: hosts in the run by result (result=patched|dry-run|failed|total)",
+    "mikes_patchrun_reboots_needed": "patchrun: hosts needing a reboot after the run",
+    "mikes_patchrun_applied": "patchrun: 1 if updates were actually applied, 0 for a dry-run",
+    "mikes_agentdemo_calls": "agentdemo: MCP tool calls in the latest run by persona",
+    "mikes_agentdemo_sensitive": "agentdemo: cross-account/bulk calls by persona (the hijack signature)",
+    "mikes_llmredteam_probes": "llmredteam: probes sent in the latest eval",
+    "mikes_llmredteam_outcome": "llmredteam: probes by outcome (outcome=blocked|refused|complied|partial|error)",
+    "mikes_llmredteam_findings": "llmredteam: probes the model complied with (findings)",
+    "mikes_llmredteam_status_code": "llmredteam status: 0 green, 1 yellow, 2 red, 3 unknown",
 }
 TYPE = {n: "gauge" for n in HELP}
 
@@ -155,6 +175,63 @@ def metrics_for(rep):
         out.append(("mikes_servicemap_changes", {"agent": agent, "kind": "total"}, sum(kinds.values())))
         for k, n in kinds.items():
             out.append(("mikes_servicemap_changes", {"agent": agent, "kind": k}, n))
+    elif agent == "alertwatch":
+        status = str(res.get("status", "unknown")).lower()
+        out.append(("mikes_alertwatch_status_code", {"agent": agent},
+                    {"green": 0, "yellow": 1, "red": 2}.get(status, 3)))
+        alerts = res.get("alerts") or []
+        out.append(("mikes_alertwatch_alert_count", {"agent": agent, "kind": "total"}, len(alerts)))
+        out.append(("mikes_alertwatch_alert_count", {"agent": agent, "kind": "real"},
+                    count(alerts, lambda a: a.get("real", True))))
+        out.append(("mikes_alertwatch_alert_count", {"agent": agent, "kind": "false"},
+                    count(alerts, lambda a: not a.get("real", True))))
+    elif agent == "weekrollup":
+        out.append(("mikes_weekrollup_open_items", {"agent": agent}, len(res.get("open_items") or [])))
+        quality = res.get("quality") or []
+        out.append(("mikes_weekrollup_quality_issues", {"agent": agent, "severity": "total"}, len(quality)))
+        for sev in ("high", "medium", "low"):
+            n = count(quality, lambda q, s=sev: str(q.get("severity", "")).lower() == s)
+            if n:
+                out.append(("mikes_weekrollup_quality_issues", {"agent": agent, "severity": sev}, n))
+    elif agent == "patchrun":
+        status = str(res.get("status", "unknown")).lower()
+        out.append(("mikes_patchrun_status_code", {"agent": agent},
+                    {"ok": 0, "attention": 1, "failed": 2}.get(status, 3)))
+        runs = data.get("runs") or []
+        out.append(("mikes_patchrun_hosts", {"agent": agent, "result": "total"}, len(runs)))
+        for r in ("patched", "failed"):
+            n = count(runs, lambda x, rr=r: str(x.get("result", "")).lower() == rr)
+            if n:
+                out.append(("mikes_patchrun_hosts", {"agent": agent, "result": r}, n))
+        out.append(("mikes_patchrun_hosts", {"agent": agent, "result": "dry-run"},
+                    count(runs, lambda x: str(x.get("result", "")).startswith("dry-run"))))
+        out.append(("mikes_patchrun_reboots_needed", {"agent": agent}, count(runs, lambda x: x.get("reboot"))))
+        out.append(("mikes_patchrun_applied", {"agent": agent}, 1 if data.get("apply") else 0))
+    elif agent == "agentdemo":
+        for persona in ("baseline", "hijacked"):
+            trace = data.get(persona) or []
+            out.append(("mikes_agentdemo_calls", {"agent": agent, "persona": persona}, len(trace)))
+            out.append(("mikes_agentdemo_sensitive", {"agent": agent, "persona": persona},
+                        count(trace, lambda t: t.get("sensitive"))))
+    elif agent == "llmredteam":
+        rows = data.get("rows") or []
+        out.append(("mikes_llmredteam_probes", {"agent": agent}, len(rows)))
+
+        def bucket(r):  # exactly one outcome per probe
+            if r.get("outcome") == "blocked":
+                return "blocked"
+            if r.get("outcome") == "error" or r.get("verdict") == "error":
+                return "error"
+            return r.get("verdict") or "error"
+        for oc in ("blocked", "refused", "complied", "partial", "error"):
+            n = count(rows, lambda r, o=oc: bucket(r) == o)
+            if n:
+                out.append(("mikes_llmredteam_outcome", {"agent": agent, "outcome": oc}, n))
+        out.append(("mikes_llmredteam_findings", {"agent": agent},
+                    count(rows, lambda r: r.get("verdict") in ("complied", "partial"))))
+        status = str(res.get("status", "unknown")).lower()
+        out.append(("mikes_llmredteam_status_code", {"agent": agent},
+                    {"green": 0, "yellow": 1, "red": 2}.get(status, 3)))
     out.append(("mikes_agent_last_run_timestamp_seconds", {"agent": agent}, rep["ts"]))
     out.append(("mikes_agent_report_present", {"agent": agent}, 1))
     return out
@@ -232,6 +309,47 @@ def loki_lines(agent, data):
             L.append("[host] %s: %s" % (h.get("name"), h.get("error") or "kernel %s" % " -> ".join(map(str, h.get("kernel") or []))))
         bad = [h.get("name") for h in hosts.values() if h.get("error")]
         L.append("hosts: %d mapped%s" % (len(hosts) - len(bad), ", unreachable: " + ", ".join(bad) if bad else ""))
+    elif agent == "alertwatch":
+        L.append("status=%s | %s" % (res.get("status", "?"), res.get("headline", "")))
+        L.append("summary: %s" % res.get("summary", ""))
+        for a in res.get("alerts") or []:
+            L.append("[%s/%s] %s on %s: %s -> %s" % (
+                a.get("severity", "?"), "real" if a.get("real", True) else "false", a.get("alertname", ""),
+                a.get("host", ""), a.get("cause", ""), a.get("action", "")))
+    elif agent == "weekrollup":
+        L.append("headline: %s" % res.get("headline", ""))
+        L.append("summary: %s" % res.get("summary", ""))
+        for t in res.get("themes") or []:
+            L.append("[%s] %s: %s" % (t.get("area", "?"), t.get("title", ""), t.get("detail", "")))
+        for o in res.get("open_items") or []:
+            L.append("[open] %s: %s -> %s" % (o.get("title", ""), o.get("detail", ""), o.get("action", "")))
+        for q in res.get("quality") or []:
+            L.append("[quality/%s] %s: %s (%s)" % (q.get("severity", "?"), q.get("agent", ""),
+                                                   q.get("issue", ""), q.get("evidence", "")))
+    elif agent == "patchrun":
+        L.append("status=%s | %s" % (res.get("status", "?"), res.get("headline", "")))
+        L.append("summary: %s" % res.get("summary", ""))
+        for h in res.get("hosts") or []:
+            L.append("[%s] %s%s: %s" % (h.get("result", "?"), h.get("host", ""),
+                                        " REBOOT" if h.get("reboot_needed") else "", h.get("note", "")))
+        for f in res.get("followups") or []:
+            L.append("followup: %s" % f)
+    elif agent == "agentdemo":
+        L.append("mode=%s baseline=%d calls (%d cross-account) hijacked=%d calls (%d cross-account)" % (
+            data.get("mode", "?"), len(data.get("baseline") or []), data.get("sensitive_baseline", 0),
+            len(data.get("hijacked") or []), data.get("sensitive_hijacked", 0)))
+        for persona in ("baseline", "hijacked"):
+            for t in data.get(persona) or []:
+                L.append("[%s] %s%s" % (persona, t.get("tool", ""), " (cross-account)" if t.get("sensitive") else ""))
+    elif agent == "llmredteam":
+        r = res if isinstance(res, dict) else {}
+        L.append("status=%s findings=%s blocked=%s refused=%s of %s probes" % (
+            r.get("status", "?"), r.get("findings", "?"), r.get("blocked", "?"),
+            r.get("refused", "?"), r.get("total", "?")))
+        for row in data.get("rows") or []:
+            L.append("[%s] %s: outcome=%s verdict=%s risk=%s - %s" % (
+                row.get("category", "?"), (row.get("probe", "") or "")[:60], row.get("outcome", ""),
+                row.get("verdict", ""), row.get("risk", ""), row.get("why", "")))
     return L
 
 
@@ -244,7 +362,7 @@ def push_loki(rep):
     if not isinstance(res, dict):
         res = data
     stream = {"agent": agent, "report": rep["id"]}
-    if agent == "labwatch":
+    if agent in ("labwatch", "alertwatch", "patchrun", "llmredteam"):
         st = str(res.get("status", "")).lower()
         if st:
             stream["status"] = st

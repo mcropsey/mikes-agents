@@ -1,0 +1,10 @@
+[Unit]
+Description=Run alertwatch triage of current alerts (daily heartbeat) (*-*-* 07:00:00)
+
+[Timer]
+Unit=alertwatch-heartbeat.service
+OnCalendar=*-*-* 07:00:00 America/Chicago
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -40,15 +40,17 @@ LAB_HOSTS = """\
 class Agent:
     """One agent run: an OpenAI-compatible client on the agent's own LiteLLM key, plus call stats."""
 
-    def __init__(self, name: str):
+    def __init__(self, name: str, key_env: str | None = None):
         self.name = name
         self.calls = 0
         self.tool_calls = 0
         self.tokens = 0
         self.started = time.monotonic()
+        # Key env var defaults to the first dash-segment of the name (labwatch-agent -> LABWATCH_KEY),
+        # but agents that run several personas under distinct LiteLLM keys pass key_env explicitly.
         self.client = OpenAI(
             base_url=LITELLM_URL,
-            api_key=os.environ[f"{name.split('-')[0].upper()}_KEY"],
+            api_key=os.environ[key_env or f"{name.split('-')[0].upper()}_KEY"],
             default_headers={"X-Agent-Name": name, "X-Agent-Host": HOST},
             timeout=1200,
             max_retries=2,

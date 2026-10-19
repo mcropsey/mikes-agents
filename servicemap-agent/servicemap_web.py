@@ -21,7 +21,9 @@ SITE = os.environ.get("SERVICEMAP_SITE", "/opt/labagents/data/servicemap/site")
 REPORTS = dict(kv.split("=", 1) for kv in os.environ.get(
     "SERVICEMAP_REPORTS",
     "labwatch=/srv/reports/labwatch,cvewatch=/srv/reports/cvewatch,patchwatch=/srv/reports/patchwatch,"
-    "secnews=/srv/reports/secnews,servicemap=/srv/reports/servicemap").split(",") if "=" in kv)
+    "secnews=/srv/reports/secnews,servicemap=/srv/reports/servicemap,"
+    "alertwatch=/srv/reports/alertwatch,weekrollup=/srv/reports/weekrollup,patchrun=/srv/reports/patchrun,"
+    "agentdemo=/srv/reports/agentdemo,llmredteam=/srv/reports/llmredteam").split(",") if "=" in kv)
 GRAFANA = os.environ.get("SERVICEMAP_GRAFANA", "http://192.168.1.98:3000")
 ABOUT = {
     "labwatch": ("Lab health briefing", "daily 06:15"),
@@ -29,6 +31,11 @@ ABOUT = {
     "patchwatch": ("Patch & image drift plan", "daily 06:45"),
     "secnews": ("Cybersecurity news digest", "daily 06:00"),
     "servicemap": ("Lab service map", "daily 05:40"),
+    "alertwatch": ("Alert triage (event-driven)", "on alert + daily 07:00"),
+    "weekrollup": ("Weekly digest + agent quality check", "Fri 06:55"),
+    "patchrun": ("Approved OS patch runs", "on demand"),
+    "agentdemo": ("Safe vs hijacked agent demo", "on demand"),
+    "llmredteam": ("LLM guardrail eval", "Sun 06:50"),
 }
 STAMP = re.compile(r"^(\d{4}-\d{2}-\d{2})_(\d{2})(\d{2})\.(html|json)$")
 SAFE = re.compile(r"^[\w.-]+\.(html|json)$")

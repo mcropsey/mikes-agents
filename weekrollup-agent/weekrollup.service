@@ -1,0 +1,9 @@
+[Unit]
+Description=Weekly lab digest + agent quality check (weekrollup-agent)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/podman run --rm --name weekrollup --network host --env-file /opt/labagents/labagents.env -e SECNEWS_REPORTS=/secnews-reports -v /opt/labagents/data:/data:z -v /opt/secnews/data/reports:/secnews-reports:ro,z localhost/labagents:latest labagents.weekrollup
+TimeoutStartSec=30min

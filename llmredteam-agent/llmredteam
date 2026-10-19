@@ -1,0 +1,4 @@
+#!/bin/bash
+# Safety/guardrail eval of the lab's own LiteLLM gateway + local model. Extra args go to the agent.
+exec sudo podman run --rm --name llmredteam-manual --network host --env-file /opt/labagents/labagents.env \
+  -v /opt/labagents/data:/data:z localhost/labagents:latest labagents.llmredteam "$@"

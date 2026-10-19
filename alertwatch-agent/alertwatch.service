@@ -1,0 +1,14 @@
+[Unit]
+Description=Alert triage receiver (alertwatch-agent) - Alertmanager webhook on :9435
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/podman run --rm --replace --name alertwatch --network host --env-file /opt/labagents/labagents.env -v /opt/labagents/data:/data:z localhost/labagents:latest labagents.alertwatch --serve
+ExecStop=/usr/bin/podman stop -t 5 alertwatch
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

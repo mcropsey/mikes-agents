@@ -1,0 +1,7 @@
+#!/bin/bash
+# Apply patchwatch's OS security updates WITH APPROVAL. Dry-run by default; --approve <token> to apply.
+# Needs the lab SSH key + sudo -n on each host, so it runs with the host network and the mcropsey SSH dir.
+exec sudo podman run --rm --name patchrun-manual --network host --env-file /opt/labagents/labagents.env \
+  -v /opt/labagents/data:/data:z \
+  -v /home/mcropsey/.ssh:/root/.ssh:ro,z \
+  localhost/labagents:latest labagents.patchrun "$@"

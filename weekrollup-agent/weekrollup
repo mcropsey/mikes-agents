@@ -1,0 +1,6 @@
+#!/bin/bash
+# Weekly digest of every agent's reports + a quality check. Extra args go to the agent (try --help).
+exec sudo podman run --rm --name weekrollup-manual --network host --env-file /opt/labagents/labagents.env \
+  -e SECNEWS_REPORTS=/secnews-reports \
+  -v /opt/labagents/data:/data:z -v /opt/secnews/data/reports:/secnews-reports:ro,z \
+  localhost/labagents:latest labagents.weekrollup "$@"

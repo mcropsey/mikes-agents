@@ -26,6 +26,19 @@ The guardrail opt-out is read only from admin-set key/team metadata. A caller ca
 | `cvewatch-agent` | CVE-to-Lab Matcher (cvewatch-agent) | `CVEWATCH_KEY` |
 | `patchwatch-agent` | Patch & Image Drift Watch (patchwatch-agent) | `PATCHWATCH_KEY` |
 | `servicemap-agent` | Lab Service Map (servicemap-agent) | `SERVICEMAP_KEY` (registered 2026-10-13) |
+| `alertwatch-agent` | Alert Triage (alertwatch-agent) | `ALERTWATCH_KEY` |
+| `weekrollup-agent` | Weekly Digest & Agent QA (weekrollup-agent) | `WEEKROLLUP_KEY` |
+| `patchrun-agent` | Approved Patch Runner (patchrun-agent) | `PATCHRUN_KEY` |
+| `agentdemo-baseline` | Agent Demo: Baseline (agentdemo-baseline) | `AGENTDEMO_BASELINE_KEY` |
+| `agentdemo-anomaly` | Agent Demo: Hijacked (agentdemo-anomaly) | `AGENTDEMO_ANOMALY_KEY` |
+| `llmredteam-probe` | LLM Guardrail Eval: Probe (llmredteam-probe) | `LLMREDTEAM_PROBE_KEY` |
+| `llmredteam-judge` | LLM Guardrail Eval: Judge (llmredteam-judge) | `LLMREDTEAM_JUDGE_KEY` |
+
+The seven agents above were registered **2026-10-19**. All opt out of `basic-safety-filter` **except
+`llmredteam-probe`**, which keeps the guardrail on because it is the system under test (see
+[llmredteam-agent/](../llmredteam-agent/)). `agentdemo` runs two personas under two keys so LiteLLM attributes
+the safe and hijacked agents separately; `llmredteam` uses a probe key (guardrail on) and a judge key
+(guardrail off).
 
 ## Create or rotate a key
 

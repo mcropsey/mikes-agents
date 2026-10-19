@@ -1,0 +1,1163 @@
+{
+ "uid": "agent-lab-ii",
+ "title": "Agent Lab \u00b7 Agents II (ops + AI-security)",
+ "tags": [
+  "mikes-agents"
+ ],
+ "timezone": "browser",
+ "schemaVersion": 39,
+ "version": 1,
+ "refresh": "1m",
+ "time": {
+  "from": "now-7d",
+  "to": "now"
+ },
+ "templating": {
+  "list": []
+ },
+ "annotations": {
+  "list": []
+ },
+ "links": [
+  {
+   "title": "Daily Reports",
+   "type": "link",
+   "url": "/d/agent-daily-reports",
+   "targetBlank": false
+  },
+  {
+   "title": "Report index",
+   "type": "link",
+   "url": "http://192.168.1.98:9440/reports/",
+   "targetBlank": true
+  }
+ ],
+ "panels": [
+  {
+   "type": "text",
+   "title": "Agent Lab \u2014 new agents (2026-10)",
+   "gridPos": {
+    "h": 3,
+    "w": 24,
+    "x": 0,
+    "y": 0
+   },
+   "options": {
+    "mode": "markdown",
+    "content": "These five agents were added 2026-10-19. **alertwatch** triages Alertmanager alerts (event-driven), **weekrollup** writes the Friday digest + agent quality check, **patchrun** applies approved OS security patches, **agentdemo** contrasts a safe vs a hijacked AI agent against the owned crAPI training lab, and **llmredteam** evaluates the LiteLLM guardrail. See also [Daily Reports](/d/agent-daily-reports) and the [report index](http://192.168.1.98:9440/reports/)."
+   },
+   "id": 1
+  },
+  {
+   "type": "stat",
+   "title": "alertwatch \u00b7 status",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "h": 4,
+    "w": 6,
+    "x": 0,
+    "y": 3
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "color": {
+      "mode": "thresholds"
+     },
+     "mappings": [
+      {
+       "type": "value",
+       "options": {
+        "0": {
+         "text": "GREEN/OK",
+         "color": "green"
+        },
+        "1": {
+         "text": "YELLOW",
+         "color": "yellow"
+        },
+        "2": {
+         "text": "RED",
+         "color": "red"
+        },
+        "3": {
+         "text": "unknown",
+         "color": "text"
+        }
+       }
+      }
+     ],
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "green",
+        "value": null
+       },
+       {
+        "color": "yellow",
+        "value": 1
+       },
+       {
+        "color": "red",
+        "value": 3
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "fields": "",
+     "values": false
+    },
+    "textMode": "value",
+    "colorMode": "value",
+    "graphMode": "none",
+    "justifyMode": "auto"
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "mikes_alertwatch_status_code",
+     "instant": true,
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     }
+    }
+   ],
+   "id": 2
+  },
+  {
+   "type": "stat",
+   "title": "alertwatch \u00b7 alerts (last triage)",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "h": 4,
+    "w": 6,
+    "x": 6,
+    "y": 3
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "color": {
+      "mode": "thresholds"
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "green",
+        "value": null
+       },
+       {
+        "color": "yellow",
+        "value": 1
+       },
+       {
+        "color": "red",
+        "value": 3
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "fields": "",
+     "values": false
+    },
+    "textMode": "auto",
+    "colorMode": "value",
+    "graphMode": "none",
+    "justifyMode": "auto"
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "mikes_alertwatch_alert_count{kind=\"total\"}",
+     "instant": true,
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     }
+    }
+   ],
+   "id": 3
+  },
+  {
+   "type": "stat",
+   "title": "llmredteam \u00b7 status",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "h": 4,
+    "w": 6,
+    "x": 12,
+    "y": 3
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "color": {
+      "mode": "thresholds"
+     },
+     "mappings": [
+      {
+       "type": "value",
+       "options": {
+        "0": {
+         "text": "GREEN/OK",
+         "color": "green"
+        },
+        "1": {
+         "text": "YELLOW",
+         "color": "yellow"
+        },
+        "2": {
+         "text": "RED",
+         "color": "red"
+        },
+        "3": {
+         "text": "unknown",
+         "color": "text"
+        }
+       }
+      }
+     ],
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "green",
+        "value": null
+       },
+       {
+        "color": "yellow",
+        "value": 1
+       },
+       {
+        "color": "red",
+        "value": 3
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "fields": "",
+     "values": false
+    },
+    "textMode": "value",
+    "colorMode": "value",
+    "graphMode": "none",
+    "justifyMode": "auto"
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "mikes_llmredteam_status_code",
+     "instant": true,
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     }
+    }
+   ],
+   "id": 4
+  },
+  {
+   "type": "stat",
+   "title": "llmredteam \u00b7 findings",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "h": 4,
+    "w": 6,
+    "x": 18,
+    "y": 3
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "color": {
+      "mode": "thresholds"
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "green",
+        "value": null
+       },
+       {
+        "color": "red",
+        "value": 1
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "fields": "",
+     "values": false
+    },
+    "textMode": "auto",
+    "colorMode": "value",
+    "graphMode": "none",
+    "justifyMode": "auto"
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "mikes_llmredteam_findings",
+     "instant": true,
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     }
+    }
+   ],
+   "id": 5
+  },
+  {
+   "type": "stat",
+   "title": "patchrun \u00b7 status",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "h": 4,
+    "w": 6,
+    "x": 0,
+    "y": 7
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "color": {
+      "mode": "thresholds"
+     },
+     "mappings": [
+      {
+       "type": "value",
+       "options": {
+        "0": {
+         "text": "GREEN/OK",
+         "color": "green"
+        },
+        "1": {
+         "text": "YELLOW",
+         "color": "yellow"
+        },
+        "2": {
+         "text": "RED",
+         "color": "red"
+        },
+        "3": {
+         "text": "unknown",
+         "color": "text"
+        }
+       }
+      }
+     ],
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "green",
+        "value": null
+       },
+       {
+        "color": "yellow",
+        "value": 1
+       },
+       {
+        "color": "red",
+        "value": 3
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "fields": "",
+     "values": false
+    },
+    "textMode": "value",
+    "colorMode": "value",
+    "graphMode": "none",
+    "justifyMode": "auto"
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "mikes_patchrun_status_code",
+     "instant": true,
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     }
+    }
+   ],
+   "id": 6
+  },
+  {
+   "type": "stat",
+   "title": "patchrun \u00b7 reboots needed",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "h": 4,
+    "w": 6,
+    "x": 6,
+    "y": 7
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "color": {
+      "mode": "thresholds"
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "green",
+        "value": null
+       },
+       {
+        "color": "yellow",
+        "value": 1
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "fields": "",
+     "values": false
+    },
+    "textMode": "auto",
+    "colorMode": "value",
+    "graphMode": "none",
+    "justifyMode": "auto"
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "mikes_patchrun_reboots_needed",
+     "instant": true,
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     }
+    }
+   ],
+   "id": 7
+  },
+  {
+   "type": "stat",
+   "title": "weekrollup \u00b7 open items",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "h": 4,
+    "w": 6,
+    "x": 12,
+    "y": 7
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "color": {
+      "mode": "thresholds"
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "green",
+        "value": null
+       },
+       {
+        "color": "yellow",
+        "value": 1
+       },
+       {
+        "color": "red",
+        "value": 3
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "fields": "",
+     "values": false
+    },
+    "textMode": "auto",
+    "colorMode": "value",
+    "graphMode": "none",
+    "justifyMode": "auto"
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "mikes_weekrollup_open_items",
+     "instant": true,
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     }
+    }
+   ],
+   "id": 8
+  },
+  {
+   "type": "stat",
+   "title": "weekrollup \u00b7 quality notes",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "h": 4,
+    "w": 6,
+    "x": 18,
+    "y": 7
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "color": {
+      "mode": "thresholds"
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "green",
+        "value": null
+       },
+       {
+        "color": "yellow",
+        "value": 1
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "fields": "",
+     "values": false
+    },
+    "textMode": "auto",
+    "colorMode": "value",
+    "graphMode": "none",
+    "justifyMode": "auto"
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "mikes_weekrollup_quality_issues{severity=\"total\"}",
+     "instant": true,
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     }
+    }
+   ],
+   "id": 9
+  },
+  {
+   "type": "stat",
+   "title": "agentdemo \u00b7 baseline cross-account calls",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "h": 4,
+    "w": 6,
+    "x": 0,
+    "y": 11
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "color": {
+      "mode": "thresholds"
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "green",
+        "value": null
+       },
+       {
+        "color": "red",
+        "value": 1
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "fields": "",
+     "values": false
+    },
+    "textMode": "auto",
+    "colorMode": "value",
+    "graphMode": "none",
+    "justifyMode": "auto"
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "mikes_agentdemo_sensitive{persona=\"baseline\"}",
+     "instant": true,
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     }
+    }
+   ],
+   "id": 10
+  },
+  {
+   "type": "stat",
+   "title": "agentdemo \u00b7 HIJACKED cross-account calls",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "h": 4,
+    "w": 6,
+    "x": 6,
+    "y": 11
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "color": {
+      "mode": "thresholds"
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "green",
+        "value": null
+       },
+       {
+        "color": "red",
+        "value": 1
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "fields": "",
+     "values": false
+    },
+    "textMode": "auto",
+    "colorMode": "value",
+    "graphMode": "none",
+    "justifyMode": "auto"
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "mikes_agentdemo_sensitive{persona=\"hijacked\"}",
+     "instant": true,
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     }
+    }
+   ],
+   "id": 11
+  },
+  {
+   "type": "timeseries",
+   "title": "agentdemo \u00b7 MCP calls by persona",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "h": 8,
+    "w": 12,
+    "x": 12,
+    "y": 11
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "custom": {
+      "drawStyle": "line",
+      "fillOpacity": 15,
+      "showPoints": "auto",
+      "lineWidth": 2,
+      "stacking": {
+       "mode": "none"
+      }
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom",
+     "showLegend": true
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "mikes_agentdemo_calls",
+     "legendFormat": "{{persona}}",
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     }
+    }
+   ],
+   "id": 12
+  },
+  {
+   "type": "timeseries",
+   "title": "llmredteam \u00b7 probe outcomes",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "h": 8,
+    "w": 12,
+    "x": 0,
+    "y": 15
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "custom": {
+      "drawStyle": "line",
+      "fillOpacity": 15,
+      "showPoints": "auto",
+      "lineWidth": 2,
+      "stacking": {
+       "mode": "none"
+      }
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom",
+     "showLegend": true
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "mikes_llmredteam_outcome",
+     "legendFormat": "{{outcome}}",
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     }
+    }
+   ],
+   "id": 13
+  },
+  {
+   "type": "timeseries",
+   "title": "alertwatch \u00b7 alerts triaged (real vs false)",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "h": 8,
+    "w": 12,
+    "x": 12,
+    "y": 15
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "custom": {
+      "drawStyle": "line",
+      "fillOpacity": 15,
+      "showPoints": "auto",
+      "lineWidth": 2,
+      "stacking": {
+       "mode": "none"
+      }
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom",
+     "showLegend": true
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "mikes_alertwatch_alert_count{kind=\"real\"}",
+     "legendFormat": "real",
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     }
+    },
+    {
+     "refId": "B",
+     "expr": "mikes_alertwatch_alert_count{kind=\"false\"}",
+     "legendFormat": "false",
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     }
+    }
+   ],
+   "id": 14
+  },
+  {
+   "type": "logs",
+   "title": "alertwatch \u00b7 report log",
+   "datasource": {
+    "type": "loki",
+    "uid": "loki"
+   },
+   "gridPos": {
+    "h": 12,
+    "w": 12,
+    "x": 0,
+    "y": 23
+   },
+   "options": {
+    "sortOrder": "Descending",
+    "showTime": true,
+    "wrapLogMessage": true,
+    "enableLogDetails": true,
+    "dedupStrategy": "none",
+    "pageSize": 200
+   },
+   "fieldConfig": {
+    "defaults": {},
+    "overrides": []
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "{agent=\"alertwatch\"}",
+     "queryType": "range",
+     "datasource": {
+      "type": "loki",
+      "uid": "loki"
+     }
+    }
+   ],
+   "links": [
+    {
+     "title": "Full alertwatch report (HTML)",
+     "url": "http://192.168.1.98:9440/reports/alertwatch/latest.html",
+     "targetBlank": true
+    },
+    {
+     "title": "All alertwatch reports",
+     "url": "http://192.168.1.98:9440/reports/#alertwatch",
+     "targetBlank": true
+    }
+   ],
+   "id": 15
+  },
+  {
+   "type": "logs",
+   "title": "weekrollup \u00b7 report log",
+   "datasource": {
+    "type": "loki",
+    "uid": "loki"
+   },
+   "gridPos": {
+    "h": 12,
+    "w": 12,
+    "x": 12,
+    "y": 23
+   },
+   "options": {
+    "sortOrder": "Descending",
+    "showTime": true,
+    "wrapLogMessage": true,
+    "enableLogDetails": true,
+    "dedupStrategy": "none",
+    "pageSize": 200
+   },
+   "fieldConfig": {
+    "defaults": {},
+    "overrides": []
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "{agent=\"weekrollup\"}",
+     "queryType": "range",
+     "datasource": {
+      "type": "loki",
+      "uid": "loki"
+     }
+    }
+   ],
+   "links": [
+    {
+     "title": "Full weekrollup report (HTML)",
+     "url": "http://192.168.1.98:9440/reports/weekrollup/latest.html",
+     "targetBlank": true
+    },
+    {
+     "title": "All weekrollup reports",
+     "url": "http://192.168.1.98:9440/reports/#weekrollup",
+     "targetBlank": true
+    }
+   ],
+   "id": 16
+  },
+  {
+   "type": "logs",
+   "title": "patchrun \u00b7 report log",
+   "datasource": {
+    "type": "loki",
+    "uid": "loki"
+   },
+   "gridPos": {
+    "h": 12,
+    "w": 12,
+    "x": 0,
+    "y": 35
+   },
+   "options": {
+    "sortOrder": "Descending",
+    "showTime": true,
+    "wrapLogMessage": true,
+    "enableLogDetails": true,
+    "dedupStrategy": "none",
+    "pageSize": 200
+   },
+   "fieldConfig": {
+    "defaults": {},
+    "overrides": []
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "{agent=\"patchrun\"}",
+     "queryType": "range",
+     "datasource": {
+      "type": "loki",
+      "uid": "loki"
+     }
+    }
+   ],
+   "links": [
+    {
+     "title": "Full patchrun report (HTML)",
+     "url": "http://192.168.1.98:9440/reports/patchrun/latest.html",
+     "targetBlank": true
+    },
+    {
+     "title": "All patchrun reports",
+     "url": "http://192.168.1.98:9440/reports/#patchrun",
+     "targetBlank": true
+    }
+   ],
+   "id": 17
+  },
+  {
+   "type": "logs",
+   "title": "agentdemo \u00b7 report log",
+   "datasource": {
+    "type": "loki",
+    "uid": "loki"
+   },
+   "gridPos": {
+    "h": 12,
+    "w": 12,
+    "x": 12,
+    "y": 35
+   },
+   "options": {
+    "sortOrder": "Descending",
+    "showTime": true,
+    "wrapLogMessage": true,
+    "enableLogDetails": true,
+    "dedupStrategy": "none",
+    "pageSize": 200
+   },
+   "fieldConfig": {
+    "defaults": {},
+    "overrides": []
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "{agent=\"agentdemo\"}",
+     "queryType": "range",
+     "datasource": {
+      "type": "loki",
+      "uid": "loki"
+     }
+    }
+   ],
+   "links": [
+    {
+     "title": "Full agentdemo report (HTML)",
+     "url": "http://192.168.1.98:9440/reports/agentdemo/latest.html",
+     "targetBlank": true
+    },
+    {
+     "title": "All agentdemo reports",
+     "url": "http://192.168.1.98:9440/reports/#agentdemo",
+     "targetBlank": true
+    }
+   ],
+   "id": 18
+  },
+  {
+   "type": "logs",
+   "title": "llmredteam \u00b7 report log",
+   "datasource": {
+    "type": "loki",
+    "uid": "loki"
+   },
+   "gridPos": {
+    "h": 12,
+    "w": 12,
+    "x": 0,
+    "y": 47
+   },
+   "options": {
+    "sortOrder": "Descending",
+    "showTime": true,
+    "wrapLogMessage": true,
+    "enableLogDetails": true,
+    "dedupStrategy": "none",
+    "pageSize": 200
+   },
+   "fieldConfig": {
+    "defaults": {},
+    "overrides": []
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "{agent=\"llmredteam\"}",
+     "queryType": "range",
+     "datasource": {
+      "type": "loki",
+      "uid": "loki"
+     }
+    }
+   ],
+   "links": [
+    {
+     "title": "Full llmredteam report (HTML)",
+     "url": "http://192.168.1.98:9440/reports/llmredteam/latest.html",
+     "targetBlank": true
+    },
+    {
+     "title": "All llmredteam reports",
+     "url": "http://192.168.1.98:9440/reports/#llmredteam",
+     "targetBlank": true
+    }
+   ],
+   "id": 19
+  }
+ ]
+}

@@ -1,0 +1,5 @@
+#!/bin/bash
+# Triage currently-firing alerts once (manual / demo). The always-on receiver is alertwatch.service.
+# Extra args go to the agent (try --help).
+exec sudo podman run --rm --name alertwatch-manual --network host --env-file /opt/labagents/labagents.env \
+  -v /opt/labagents/data:/data:z localhost/labagents:latest labagents.alertwatch --test "$@"

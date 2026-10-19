@@ -1,0 +1,9 @@
+[Unit]
+Description=Run the weekly LLM guardrail eval (llmredteam-agent) (Sun 06:50)
+
+[Timer]
+OnCalendar=Sun *-*-* 06:50:00 America/Chicago
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -16,6 +16,11 @@ reports/<agent>/<stamp>.json ──► agenthub.py (:9430, polls every 20 s)
 | patchwatch | items by priority, hosts with updates, advisories | headline, summary, one line per priority |
 | secnews | stories (by severity), KEV notes present | headline, summary, one line per story, KEV notes |
 | servicemap | hosts ok/unreachable, components, AI components, changes by kind | change summary, one line per added/removed/changed component or host, host count |
+| alertwatch | status code/label, alerts in last triage (total/real/false) | status + headline, summary, one line per triaged alert |
+| weekrollup | open items, quality notes by severity | headline, summary, one line per theme / open item / quality note |
+| patchrun | status code, hosts by result, reboots needed, applied flag | status + headline, summary, one line per host + follow-ups |
+| agentdemo | MCP calls and cross-account/bulk calls by persona | mode + per-persona call counts, one line per tool call |
+| llmredteam | probes, outcomes (blocked/refused/complied/partial/error), findings, status | status/findings line, one line per probe with outcome/verdict/risk |
 
 Every agent also gets `mikes_agent_last_run_timestamp_seconds` and `mikes_agent_report_present`. A report is pushed to
 Loki once per new report id; after a restart the latest reports are pushed again with the same timestamps and lines,
@@ -25,7 +30,11 @@ which Loki drops as duplicates.
 
 Dashboard **Agent Lab · Daily Reports** (`/d/agent-daily-reports`), source copy in
 [`grafana/daily-reports.json`](grafana/daily-reports.json), installed at
-`/opt/monitoring/grafana/dashboards/Agent Lab/daily-reports.json`. Each report-log panel's title menu links to that
+`/opt/monitoring/grafana/dashboards/Agent Lab/daily-reports.json`. The five agents added 2026-10-19 have their
+own dashboard **Agent Lab · Agents II** (`/d/agent-lab-ii`), source copy
+[`grafana/agents-ii.json`](grafana/agents-ii.json), installed at
+`/opt/monitoring/grafana/dashboards/Agent Lab/agents-ii.json` (stat tiles from the `mikes_*` metrics + a report
+log per agent; the agentdemo "baseline vs hijacked cross-account calls" tiles are the demo's punchline). Each report-log panel's title menu links to that
 agent's full HTML report, and the **Full reports** panel and the dashboard links open the report listing
 `http://192.168.1.98:9440/reports/` (served by [servicemap-web](../servicemap-agent/), LAN only).
 

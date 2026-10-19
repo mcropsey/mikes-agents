@@ -12,6 +12,14 @@ RTX 5090) only through the **LiteLLM** gateway on .101, and they email their rep
 | [patchwatch-agent](patchwatch-agent/) | Daily patch plan: OS updates, security advisories, reboots, container image drift | daily 06:45 | `patchwatch` |
 | [labinventory](labinventory/) | Software inventory of every lab host over SSH (no LLM); feeds cvewatch + patchwatch | daily 05:30 | `labinventory` |
 | [servicemap-agent](servicemap-agent/) | Maps every service, timer, cron job, container, k8s workload and AI agent on the hosts Grafana monitors; page on .98:9440 + Grafana, published to cropsey-lab | daily 05:40 | `servicemap` |
+| [alertwatch-agent](alertwatch-agent/) | **Event-driven** triage of Alertmanager alerts (reuses labwatch's Prometheus/Loki tools); bounded to protect the GPU | on alert + daily 07:00 | `alertwatch` |
+| [patchrun-agent](patchrun-agent/) | Applies the OS **security** updates patchwatch recommends, **approval-gated**, dry-run by default, never reboots | on demand | `patchrun` |
+| [weekrollup-agent](weekrollup-agent/) | Weekly digest of every agent's reports **plus a quality check** that flags reports contradicting the data | Fri 06:55 | `weekrollup` |
+| [agentdemo-agent](agentdemo-agent/) | Demo: a **safe agent vs a hijacked (prompt-injected) agent** driving the same crAPI MCP tools, for API-security talks | on demand | `agentdemo` |
+| [llmredteam-agent](llmredteam-agent/) | Safety/guardrail **eval** of the LiteLLM gateway: OWASP-LLM-style probes, judged pass/fail | Sun 06:50 | `llmredteam` |
+
+The last five were added **2026-10-19**: three practical (alertwatch, patchrun, weekrollup) and two for
+API-security demos (agentdemo, llmredteam). See [TALKING-POINTS.md](TALKING-POINTS.md) for the demo narration.
 
 Maintenance helper scripts (not agents) are in [ops](ops/), e.g. the one-at-a-time reboot run used after patching.
 [agenthub](agenthub/) exports every agent's latest report to Prometheus + Loki for the Grafana dashboard
@@ -53,9 +61,20 @@ flowchart LR
  06:00 secnews  ─┐
  06:15 labwatch ─┼─► LiteLLM (.101:4000) ──► LM Studio qwen3.8-27b (.194, RTX 5090)
  06:30 cvewatch ─┤        one virtual key + agent-registry entry per agent
- 06:45 patchwatch┘
+ 06:45 patchwatch┘       (agentdemo uses two keys; llmredteam uses two)
+ 06:50 llmredteam (Sun)  guardrail eval
+ 06:55 weekrollup (Fri)  weekly digest + agent quality check
+ 07:00 alertwatch        daily heartbeat (also fires on any Alertmanager alert, any time)
         └──► reports saved on .98 + emailed via smtp.gmail.com:465
+
+ on demand:  patchrun (approval-gated patching) · agentdemo (safe vs hijacked agent)
+ event:      Alertmanager alert ──webhook──► alertwatch receiver (:9435) ──► triage
 ```
+
+The 2026-10-19 agents keep the GPU rules: the scheduled ones (llmredteam, weekrollup, alertwatch heartbeat) run
+before 07:00; alertwatch is event-driven but **bounded** (coalesce + min-interval, and during 08:00-22:00 it
+triages only `critical` alerts live, holding the rest for the top of the hour); agentdemo/patchrun are run by
+hand. agentdemo and llmredteam each use **two** LiteLLM keys (two personas / probe+judge).
 
 ## Design rules
 
@@ -78,8 +97,8 @@ flowchart LR
 |---|---|
 | `/opt/secnews/` | `app/` (secnews.py, Containerfile), `secnews.env` (600), `data/reports/` |
 | `/opt/labagents/` | `app/labagents/` (common + agent modules), `app/labinventory.py`, `app/Containerfile`, `hosts.conf`, `labagents.env` (600), `data/inventory/`, `data/reports/<agent>/` |
-| `/usr/local/bin/` | `secnews`, `labwatch`, `cvewatch`, `patchwatch`, `labinventory`, `servicemap` |
-| `/etc/systemd/system/` | `<name>.service` + `<name>.timer` for each |
+| `/usr/local/bin/` | `secnews`, `labwatch`, `cvewatch`, `patchwatch`, `labinventory`, `servicemap`, `alertwatch`, `patchrun`, `weekrollup`, `agentdemo`, `llmredteam` |
+| `/etc/systemd/system/` | `<name>.service` + `<name>.timer` for the scheduled agents; plus `alertwatch.service` (always-on receiver) and `alertwatch-heartbeat.service` (the heartbeat the timer runs) |
 
 Reports: `/opt/secnews/data/reports/latest.html` and `/opt/labagents/data/reports/<agent>/latest.html`.
 Browse them all at **http://192.168.1.98:9440/reports/** (LAN only; served by `servicemap-web`, linked from Grafana and
@@ -143,6 +162,20 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now servicemap-web.service agenthub.service servicemap.timer
 servicemap                                                                             # first map + publish
 
+# agents added 2026-10-19 (alertwatch, patchrun, weekrollup, agentdemo, llmredteam)
+sudo cp lab-agents-common/labagents/{mcpclient,alertwatch,weekrollup,patchrun,agentdemo,llmredteam}.py \
+        /opt/labagents/app/labagents/                                                  # + rebuild image (podman build line above)
+sudo mkdir -p /opt/labagents/data/reports/{alertwatch,weekrollup,patchrun,agentdemo,llmredteam}
+for a in alertwatch-agent/alertwatch weekrollup-agent/weekrollup patchrun-agent/patchrun \
+         agentdemo-agent/agentdemo llmredteam-agent/llmredteam; do sudo install -m 755 $a /usr/local/bin/; done
+sudo cp alertwatch-agent/*.service alertwatch-agent/*.timer weekrollup-agent/*.service weekrollup-agent/*.timer \
+        llmredteam-agent/*.service llmredteam-agent/*.timer /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now alertwatch.service alertwatch.timer weekrollup.timer llmredteam.timer
+# Alertmanager -> alertwatch: set the webhook receiver in /opt/monitoring/alertmanager/config/alertmanager.yml
+#   (route.receiver: alertwatch, webhook url http://192.168.1.98:9435/alert) and restart alertmanager.
+# LiteLLM keys for all seven new aliases: see litellm/README.md. Grafana dashboard: agenthub/grafana/agents-ii.json.
+
 # Grafana + Prometheus on .98 (see servicemap-agent/README.md and agenthub/README.md):
 #   dashboards -> /opt/monitoring/grafana/dashboards/{Lab Service Map,Agent Lab}/
 #   Prometheus jobs `agenthub` (localhost:9430) and `servicemap` (localhost:9440) in prometheus/config/prometheus.yml
@@ -172,3 +205,8 @@ that image with the `podman build` line above. Env-file edits apply on the next 
 | Email `535` auth error | Gmail app password revoked or Google password changed; make a new app password, update both env files. |
 | `401`/`403` from LiteLLM | Key deleted or its model list changed; re-run `litellm/register_agent.py` for that agent. |
 | No email at all | `journalctl -u <agent> --since today`. A failed run sends nothing; cvewatch also stays quiet when nothing affects the lab. |
+| alertwatch never triages a daytime alert | By design: 08:00-22:00 it triages only `critical` alerts live and holds the rest to the top of the hour. Check the receiver got it: `journalctl -u alertwatch`. |
+| alertwatch didn't get the alert | Alertmanager receiver must be `alertwatch` with webhook `http://192.168.1.98:9435/alert`; restart alertmanager after editing (no lifecycle reload on v0.34.1). |
+| agentdemo: `connect`/MCP error | The crapi-mcp server on `.102:8009` must be up and `AGENTDEMO_MCP_URL` correct; test with `curl -X POST .../mcp` initialize. |
+| patchrun: "approval token does not match" | A newer patchwatch report changed the plan id. Run a dry-run (`patchrun`) to get the current token. |
+| llmredteam shows everything `blocked` | Expected if the probe key is opted out of the guardrail — it must **not** be. Check `LLMREDTEAM_PROBE_KEY`'s metadata in LiteLLM. |
