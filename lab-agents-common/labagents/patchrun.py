@@ -34,10 +34,14 @@ from .common import DATA, LAB_HOSTS, MAIL_TO, Agent, card, e, load_inventory, lo
 # Patch .98 last (it hosts this agent + the monitoring stack); internet-facing / shared services late.
 ORDER = ["192.168.1.103", "192.168.1.104", "192.168.1.105", "192.168.1.102", "192.168.1.100",
          "192.168.1.99", "192.168.1.101", "192.168.1.85", "192.168.1.75", "192.168.1.76", "192.168.1.98"]
-# Runs inside the labagents container as root, so SSH out as the lab user (key mounted at /root/.ssh).
+# Runs inside the labagents container as root, so SSH out as the lab user with the key mounted at /root/.ssh.
+# -F /dev/null ignores the mounted user ssh_config (root won't accept a non-root-owned config file); the key
+# and known_hosts are named explicitly instead.
 SSH_USER = os.environ.get("PATCHRUN_SSH_USER", "mcropsey")
-SSH = ["ssh", "-n", "-l", SSH_USER, "-o", "BatchMode=yes", "-o", "ConnectTimeout=8",
-       "-o", "StrictHostKeyChecking=accept-new"]
+SSH_KEY = os.environ.get("PATCHRUN_SSH_KEY", "/root/.ssh/id_ed25519")
+SSH = ["ssh", "-n", "-F", "/dev/null", "-l", SSH_USER, "-i", SSH_KEY,
+       "-o", "IdentitiesOnly=yes", "-o", "BatchMode=yes", "-o", "ConnectTimeout=8",
+       "-o", "UserKnownHostsFile=/root/.ssh/known_hosts", "-o", "StrictHostKeyChecking=accept-new"]
 PATCHWATCH = DATA / "reports" / "patchwatch"
 
 SYSTEM = f"""You are the lab's patch operator reporting the result of a patch run to the owner.

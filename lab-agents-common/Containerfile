@@ -1,4 +1,7 @@
 FROM docker.io/library/python:3.12-slim
+# openssh-client: patchrun SSHes out to the lab hosts (as the lab user, key mounted at /root/.ssh)
+RUN apt-get update && apt-get install -y --no-install-recommends openssh-client \
+    && rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir openai==1.109.1 httpx==0.28.1
 COPY labagents /app/labagents
 WORKDIR /app
