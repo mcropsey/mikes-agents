@@ -40,6 +40,40 @@ The seven agents above were registered **2026-10-19**. All opt out of `basic-saf
 the safe and hijacked agents separately; `llmredteam` uses a probe key (guardrail on) and a judge key
 (guardrail off).
 
+## Guardrails
+
+The lab's content guardrail is **LiteLLM-native**: a v2 guardrail named `basic-safety-filter`
+(id `538513e8…`, stored in the DB, `store_model_in_db: true`) that BLOCKs harmful categories
+(`harm_toxic_abuse`, `harmful_violence`, …) at `severity_threshold: medium`. It is applied globally; every
+agent key opts out via `metadata.opted_out_global_guardrails: ["basic-safety-filter"]` **except**
+`llmredteam-probe`, which keeps it on so the [llmredteam-agent](../llmredteam-agent/) can test it. The agents
+themselves do **no** guardrailing of their own — everything is enforced at the gateway.
+
+## Monitoring (guardrails + traffic) — added 2026-10-19
+
+LiteLLM reports its own metrics to the lab Prometheus/Grafana; nothing custom in between.
+
+- **Enabled** in `/opt/litellm/config.yaml` on `.101`:
+  ```yaml
+  litellm_settings:
+    callbacks: ["prometheus"]                 # LiteLLM's native Prometheus integration (not license-gated in v1.104.0)
+    require_auth_for_metrics_endpoint: false  # /metrics is public so Prometheus can scrape it (no secrets in it)
+  ```
+  then `sudo systemctl restart litellm` (backup: `config.yaml.bak-pre-prometheus-20261019`).
+- **Scraped** by Prometheus on `.98` (`job_name: litellm`, `metrics_path: /metrics/` — `/metrics` 307-redirects —
+  target `192.168.1.101:4000`). `/metrics` carries only aggregate operational data (request/token/spend/latency
+  counts, key aliases), no prompts or secrets, and the lab is firewalled.
+- **Dashboard:** *LiteLLM Gateway* (`/d/litellm-gateway`, folder **LiteLLM**), source copy
+  [`grafana/litellm-gateway.json`](grafana/litellm-gateway.json), installed at
+  `/opt/monitoring/grafana/dashboards/LiteLLM/litellm-gateway.json`.
+
+Useful metrics (all labelled by `api_key_alias`, so everything is **per agent**):
+`litellm_proxy_total_requests_metric_total` (by `status_code` — a **guardrail BLOCK is a 400**),
+`litellm_proxy_failed_requests_metric_total`, `litellm_total_tokens_metric_total`, `litellm_spend_metric_total`,
+`litellm_request_total_latency_metric_*`, and `litellm_overhead_with_guardrails_latency_metric_*` (guardrail
+processing cost). This is *operational* guardrail monitoring (how often it fires, on which agent); llmredteam
+covers *effectiveness* (does it catch bad prompts).
+
 ## Create or rotate a key
 
 [`register_agent.py`](register_agent.py) runs inside the litellm container (the master key never leaves it),
