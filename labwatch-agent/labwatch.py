@@ -25,7 +25,10 @@ SNAPSHOT_QUERIES = {
     "targets_down": "up == 0",
     "alerts_firing": 'ALERTS{alertstate="firing"}',
     "disk_used_pct_over_70": f"round(100 * (1 - node_filesystem_avail_bytes{{{REAL_FS}}} / node_filesystem_size_bytes{{{REAL_FS}}})) > 70",
-    "disk_full_within_7d": f"predict_linear(node_filesystem_avail_bytes{{{REAL_FS}}}[24h], 7*86400) < 0",
+    # only series with ~a day of history (plain `and` matches every label, so a renamed host counts as
+    # new): one fitted on minutes of data extrapolates noise into a bogus "full in 7d"
+    "disk_full_within_7d": f"predict_linear(node_filesystem_avail_bytes{{{REAL_FS}}}[24h], 7*86400) < 0"
+                           f" and (node_filesystem_avail_bytes{{{REAL_FS}}} offset 23h)",
     "mem_used_pct_over_85": "round(100 * (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) > 85",
     "load_per_cpu_over_1": 'round(node_load15 / on(instance) count by (instance) (node_cpu_seconds_total{mode="idle"}), 0.01) > 1',
     "rebooted_last_24h": "round((time() - node_boot_time_seconds) / 3600, 0.1) < 24",
@@ -49,7 +52,10 @@ abnormal: confirm problems, find the cause, and look at actual log lines before 
 Spend at most a handful of tool calls, and don't re-query what the snapshot already shows.
 Known noise: rk3 (.77) and rk4 (.78) are reserved spares and may be down on purpose: list them as "info" only.
 Error log lines from the crAPI / Juice Shop / VAmPI / DVGA vulnerable-app labs on .101/.102 are often
-expected attack-demo traffic.
+expected attack-demo traffic. rasp5 (.85) reboots itself every day at 04:00 on purpose (scheduled-reboot.timer
+-> safe-reboot.sh), so a ~04:00 reboot there and its shutdown-time kernel noise (RCU stalls, "watchdog did not
+stop!") are "info", not a finding. The lab's own inventory/servicemap agents SSH into every host around
+05:30-05:40 and list systemd units; those logins are not the owner.
 
 When done, reply with ONLY this JSON:
 {{"status": "green|yellow|red",
