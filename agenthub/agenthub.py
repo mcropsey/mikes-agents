@@ -66,6 +66,7 @@ HELP = {
     "mikes_lab_security_pending": "labinventory: installable security updates pending on this host",
     "mikes_lab_hosts_security_pending": "labinventory: hosts with installable security updates pending",
     "mikes_lab_hosts_inventoried": "labinventory: hosts inventoried successfully",
+    "mikes_lab_unpatched_cves": "labinventory: CVEs with an installable fix not yet applied (host=all for distinct CVEs)",
     "mikes_lab_inventory_timestamp_seconds": "Unix time of the latest labinventory collection",
 }
 TYPE = {n: "gauge" for n in HELP}
@@ -251,7 +252,7 @@ def inventory_metrics():
             inv = json.load(fh)
     except Exception:
         return []
-    out, pending_hosts, ok_hosts = [], 0, 0
+    out, pending_hosts, ok_hosts, cves = [], 0, 0, set()
     for h in (inv.get("hosts") or {}).values():
         if not isinstance(h, dict) or h.get("error") or h.get("update_errors"):
             continue
@@ -260,7 +261,11 @@ def inventory_metrics():
         n = len({x.get("advisory") for x in h.get("security") or []}) + count(h.get("updates"), lambda u: u.get("security"))
         pending_hosts += 1 if n else 0
         out.append(("mikes_lab_security_pending", {"host": h.get("name", "?")}, n))
+        host_cves = {x.get("cve") for x in h.get("security_cves") or []}
+        cves |= host_cves
+        out.append(("mikes_lab_unpatched_cves", {"host": h.get("name", "?")}, len(host_cves)))
     out.append(("mikes_lab_hosts_security_pending", {}, pending_hosts))
+    out.append(("mikes_lab_unpatched_cves", {"host": "all"}, len(cves)))
     out.append(("mikes_lab_hosts_inventoried", {}, ok_hosts))
     out.append(("mikes_lab_inventory_timestamp_seconds", {}, num(inv.get("collected_ts"))))
     return out

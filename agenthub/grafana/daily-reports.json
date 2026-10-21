@@ -24,7 +24,7 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 6,
+        "w": 5,
         "x": 0,
         "y": 0
       },
@@ -96,6 +96,71 @@
     },
     {
       "type": "stat",
+      "title": "CVEs unpatched",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 5,
+        "x": 5,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "None",
+                  "index": 0
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "mikes_lab_unpatched_cves{host=\"all\"} or on() vector(0)",
+          "format": "time_series",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "description": "CVEs that affect lab hosts because a fix is available but not installed (labinventory, Rocky advisories). Green = none. Per host: mikes_lab_unpatched_cves.",
+      "id": 1
+    },
+    {
+      "type": "stat",
       "title": "cvewatch · CVEs to watch",
       "datasource": {
         "type": "prometheus",
@@ -103,8 +168,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 6,
-        "x": 6,
+        "w": 4,
+        "x": 10,
         "y": 0
       },
       "fieldConfig": {
@@ -153,8 +218,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 6,
-        "x": 12,
+        "w": 5,
+        "x": 14,
         "y": 0
       },
       "fieldConfig": {
@@ -217,8 +282,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 6,
-        "x": 18,
+        "w": 5,
+        "x": 19,
         "y": 0
       },
       "fieldConfig": {
