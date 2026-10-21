@@ -60,12 +60,6 @@ product, with the installed versions and where they run. For each GROUP decide w
   installed version is outside the affected ranges.
 Rocky/RHEL packages carry backported fixes, so an upstream version number alone is weak evidence: if a
 "rocky_fix_available" advisory is listed, say so and recommend the dnf update. KEV = known exploited, rate it up.
-Check that the vulnerable COMPONENT is installed, not just the product name. lab_installs lists the exact
-packages: a CVE in a server daemon (BIND's named, httpd, sshd, a database server) needs the server package
-(bind, httpd, openssh-server, ...); if only client/library subpackages are installed (bind-libs, bind-utils,
-*-libs, *-client) the verdict is "not_affected", and say which packages are present. A CVE that needs an
-optional or experimental feature (e.g. a WebAssembly shaper, a non-default module) that distro builds
-normally leave out is at most "possibly", never "affected", unless the data shows the feature is enabled.
 Keep text short: this is a triage list, not an essay.
 
 Reply with ONLY this JSON:
