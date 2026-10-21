@@ -88,7 +88,9 @@
         {
           "refId": "A",
           "expr": "mikes_agent_status_code{agent=\"labwatch\"}",
-          "format": "time_series"
+          "format": "time_series",
+          "instant": true,
+          "range": false
         }
       ]
     },
@@ -138,8 +140,10 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "mikes_cvewatch_finding_count{agent=\"cvewatch\",verdict=\"affected\"}",
-          "format": "time_series"
+          "expr": "mikes_cvewatch_finding_count{agent=\"cvewatch\",verdict=\"affected\"} or on() vector(0)",
+          "format": "time_series",
+          "instant": true,
+          "range": false
         }
       ]
     },
@@ -189,8 +193,10 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "mikes_patchwatch_priority_count{agent=\"patchwatch\",priority=\"critical\"}",
-          "format": "time_series"
+          "expr": "mikes_patchwatch_priority_count{agent=\"patchwatch\",priority=\"critical\"} or on() vector(0)",
+          "format": "time_series",
+          "instant": true,
+          "range": false
         }
       ]
     },
@@ -237,7 +243,9 @@
         {
           "refId": "A",
           "expr": "mikes_secnews_story_count{agent=\"secnews\"}",
-          "format": "time_series"
+          "format": "time_series",
+          "instant": true,
+          "range": false
         }
       ]
     },
@@ -960,7 +968,9 @@
         {
           "refId": "A",
           "expr": "mikes_servicemap_changes{agent=\"servicemap\",kind=\"total\"}",
-          "format": "time_series"
+          "format": "time_series",
+          "instant": true,
+          "range": false
         }
       ]
     },
@@ -997,7 +1007,9 @@
         {
           "refId": "A",
           "expr": "mikes_servicemap_components{agent=\"servicemap\"}",
-          "format": "time_series"
+          "format": "time_series",
+          "instant": true,
+          "range": false
         }
       ]
     },
@@ -1034,7 +1046,9 @@
         {
           "refId": "A",
           "expr": "mikes_servicemap_ai_components{agent=\"servicemap\"}",
-          "format": "time_series"
+          "format": "time_series",
+          "instant": true,
+          "range": false
         }
       ]
     },
