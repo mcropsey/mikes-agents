@@ -74,6 +74,11 @@ def ssh(ip: str, cmd: str, timeout: int = 900) -> tuple[int, str]:
         return 1, f"{type(ex).__name__}: {ex}"
 
 
+# Security updates dnf would install, counted as root with fresh metadata (the same view the apply step
+# gets). Skip the informational "Security: kernel-core-... is an installed security update" lines.
+DNF_SEC = "sudo -n dnf -q --refresh check-update --security 2>/dev/null | grep -v '^Security:'"
+
+
 def is_debian(os_name: str) -> bool:
     return any(s in (os_name or "").lower() for s in ("ubuntu", "debian"))
 
@@ -104,14 +109,14 @@ def host_run(ip: str, name: str, os_name: str, apply: bool, all_pkgs: bool) -> d
         rc, out = ssh(ip, "sudo -n apt-get update -qq >/dev/null 2>&1; apt-get -s upgrade 2>/dev/null | grep -E '^Inst' | wc -l")
         rec["pending_before"] = out.strip().split("\n")[-1] if rc == 0 else "?"
     else:
-        rc, out = ssh(ip, "n=$(dnf -q check-update --security 2>/dev/null | grep -cE '^[a-zA-Z0-9]'); echo $n")
+        rc, out = ssh(ip, f"n=$({DNF_SEC} | grep -cE '^[a-zA-Z0-9]'); echo $n")
         rec["pending_before"] = out.strip().split("\n")[-1] if out.strip() else "0"
 
     if not apply:
         if deb:
             rc, out = ssh(ip, "apt-get -s upgrade 2>/dev/null | grep -E '^Inst' | sed 's/^Inst //' | head -40", 120)
         else:
-            rc, out = ssh(ip, "dnf -q check-update --security 2>/dev/null | awk 'NF>=3{print $1}' | head -40", 120)
+            rc, out = ssh(ip, f"{DNF_SEC} | awk 'NF>=3{{print $1}}' | head -40", 120)
         rec["updated"] = [l for l in out.splitlines() if l.strip()]
         rec["result"] = f"dry-run: {len(rec['updated'])} package(s) would update"
         return rec
@@ -122,7 +127,7 @@ def host_run(ip: str, name: str, os_name: str, apply: bool, all_pkgs: bool) -> d
                + ("apt-get -y upgrade" if all_pkgs else "apt-get -y -o Dir::Etc::SourceList=/etc/apt/sources.list "
                   "upgrade") + " 2>&1' | tail -40")
     else:
-        cmd = f"sudo -n dnf -y update {'' if all_pkgs else '--security'} 2>&1 | tail -40"
+        cmd = f"sudo -n dnf -y --refresh update {'' if all_pkgs else '--security'} 2>&1 | tail -40"
     rc, out = ssh(ip, cmd)
     rec["error"] = "" if rc == 0 else f"rc={rc}"
     rec["apply_tail"] = out.strip().splitlines()[-12:]
@@ -131,12 +136,18 @@ def host_run(ip: str, name: str, os_name: str, apply: bool, all_pkgs: bool) -> d
     if deb:
         rc2, o2 = ssh(ip, "apt-get -s upgrade 2>/dev/null | grep -E '^Inst' | wc -l; test -f /var/run/reboot-required && echo REBOOT")
     else:
-        rc2, o2 = ssh(ip, "dnf -q check-update --security 2>/dev/null | grep -cE '^[a-zA-Z0-9]'; "
+        rc2, o2 = ssh(ip, f"{DNF_SEC} | grep -cE '^[a-zA-Z0-9]'; "
                           "test \"$(rpm -q --last kernel-core 2>/dev/null | head -1 | awk '{print $1}' | sed s/kernel-core-//)\" != \"$(uname -r)\" && echo REBOOT")
     lines = o2.splitlines()
     rec["pending_after"] = lines[0].strip() if lines else "?"
     rec["reboot"] = any("REBOOT" in l for l in lines)
-    rec["result"] = "failed" if rec["error"] else "patched"
+    before, after = rec.get("pending_before", "?"), rec["pending_after"]
+    if rec["error"]:
+        rec["result"] = "failed"
+    elif after.isdigit() and int(after) > 0:
+        rec["result"] = "no change" if after == before else "partial"
+    else:
+        rec["result"] = "patched"
     return rec
 
 
