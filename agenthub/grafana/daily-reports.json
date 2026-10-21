@@ -9,7 +9,7 @@
   "timezone": "browser",
   "schemaVersion": 39,
   "version": 1,
-  "refresh": "1h",
+  "refresh": "1m",
   "time": {
     "from": "now-14d",
     "to": "now"
@@ -284,7 +284,9 @@
         {
           "refId": "A",
           "expr": "mikes_agent_last_run_timestamp_seconds{agent=\"labwatch\"} * 1000",
-          "format": "time_series"
+          "format": "time_series",
+          "instant": true,
+          "range": false
         }
       ],
       "description": "Seconds metric x 1000: Grafana's dateTimeFromNow unit expects milliseconds."
@@ -332,7 +334,9 @@
         {
           "refId": "A",
           "expr": "mikes_agent_last_run_timestamp_seconds{agent=\"cvewatch\"} * 1000",
-          "format": "time_series"
+          "format": "time_series",
+          "instant": true,
+          "range": false
         }
       ],
       "description": "Seconds metric x 1000: Grafana's dateTimeFromNow unit expects milliseconds."
@@ -380,7 +384,9 @@
         {
           "refId": "A",
           "expr": "mikes_agent_last_run_timestamp_seconds{agent=\"patchwatch\"} * 1000",
-          "format": "time_series"
+          "format": "time_series",
+          "instant": true,
+          "range": false
         }
       ],
       "description": "Seconds metric x 1000: Grafana's dateTimeFromNow unit expects milliseconds."
@@ -428,7 +434,9 @@
         {
           "refId": "A",
           "expr": "mikes_agent_last_run_timestamp_seconds{agent=\"secnews\"} * 1000",
-          "format": "time_series"
+          "format": "time_series",
+          "instant": true,
+          "range": false
         }
       ],
       "description": "Seconds metric x 1000: Grafana's dateTimeFromNow unit expects milliseconds."
@@ -1063,7 +1071,9 @@
         {
           "refId": "A",
           "expr": "mikes_agent_last_run_timestamp_seconds{agent=\"servicemap\"} * 1000",
-          "format": "time_series"
+          "format": "time_series",
+          "instant": true,
+          "range": false
         }
       ]
     },
