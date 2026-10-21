@@ -119,8 +119,14 @@ def fetch_nvd(client: httpx.Client, hours: int) -> list:
     out, idx = [], 0
     while True:
         for attempt in range(4):
-            r = client.get(NVD, params={"pubStartDate": start.strftime(fmt), "pubEndDate": end.strftime(fmt),
-                                        "resultsPerPage": 2000, "startIndex": idx})
+            try:
+                r = client.get(NVD, params={"pubStartDate": start.strftime(fmt), "pubEndDate": end.strftime(fmt),
+                                            "resultsPerPage": 2000, "startIndex": idx})
+            except httpx.TransportError:  # big NVD pages sometimes time out or get cut off: retry, raise on the last try
+                if attempt == 3:
+                    raise
+                time.sleep(10 * (attempt + 1))
+                continue
             if r.status_code in (403, 429, 503):  # NVD rate limit without an API key: back off
                 time.sleep(10 * (attempt + 1))
                 continue
