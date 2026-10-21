@@ -1,7 +1,7 @@
 {
   "uid": "agent-daily-reports",
   "title": "Agent Lab · Daily Reports",
-  "description": "All five mikes-agents (labwatch, cvewatch, patchwatch, secnews, servicemap): status, findings, and full report text. Data: Prometheus (agenthub exporter :9430) + Loki (report logs).",
+  "description": "All five mikes-agents (labwatch, cvewatch, patchwatch, secnews, servicemap): status, patch state, CVEs to watch, and full report text. Data: Prometheus (agenthub exporter :9430) + Loki (report logs).",
   "tags": [
     "mikes-agents",
     "reports"
@@ -96,7 +96,7 @@
     },
     {
       "type": "stat",
-      "title": "cvewatch · affected findings",
+      "title": "cvewatch · CVEs to watch",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -114,12 +114,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "blue",
                 "value": null
-              },
-              {
-                "color": "red",
-                "value": 1
               }
             ]
           },
@@ -140,16 +136,17 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "mikes_cvewatch_finding_count{agent=\"cvewatch\",verdict=\"affected\"} or on() vector(0)",
+          "expr": "mikes_cvewatch_cves_matched{agent=\"cvewatch\"} or on() vector(0)",
           "format": "time_series",
           "instant": true,
           "range": false
         }
-      ]
+      ],
+      "description": "New CVEs that match software in the lab (informational; never red). Whether a host is exposed is shown by 'Security patches · hosts pending'."
     },
     {
       "type": "stat",
-      "title": "patchwatch · critical patches",
+      "title": "Security patches · hosts pending",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -171,12 +168,22 @@
                 "value": null
               },
               {
-                "color": "orange",
+                "color": "red",
                 "value": 1
               }
             ]
           },
-          "mappings": []
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "All patched",
+                  "index": 0
+                }
+              }
+            }
+          ]
         },
         "overrides": []
       },
@@ -193,12 +200,13 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "mikes_patchwatch_priority_count{agent=\"patchwatch\",priority=\"critical\"} or on() vector(0)",
+          "expr": "mikes_lab_hosts_security_pending or on() vector(0)",
           "format": "time_series",
           "instant": true,
           "range": false
         }
-      ]
+      ],
+      "description": "Hosts with an installable security update not yet applied (labinventory, fresh dnf/apt metadata). Green = every host patched. Per host: mikes_lab_security_pending."
     },
     {
       "type": "stat",

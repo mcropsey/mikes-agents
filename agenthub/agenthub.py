@@ -62,6 +62,11 @@ HELP = {
     "mikes_llmredteam_outcome": "llmredteam: probes by outcome (outcome=blocked|refused|complied|partial|error)",
     "mikes_llmredteam_findings": "llmredteam: probes the model complied with (findings)",
     "mikes_llmredteam_status_code": "llmredteam status: 0 green, 1 yellow, 2 red, 3 unknown",
+    # added 2026-10-21: patch state from labinventory, so the dashboard shows "patched?" not CVE matches
+    "mikes_lab_security_pending": "labinventory: installable security updates pending on this host",
+    "mikes_lab_hosts_security_pending": "labinventory: hosts with installable security updates pending",
+    "mikes_lab_hosts_inventoried": "labinventory: hosts inventoried successfully",
+    "mikes_lab_inventory_timestamp_seconds": "Unix time of the latest labinventory collection",
 }
 TYPE = {n: "gauge" for n in HELP}
 
@@ -237,6 +242,30 @@ def metrics_for(rep):
     return out
 
 
+INVENTORY = "/opt/labagents/data/inventory/latest.json"
+
+
+def inventory_metrics():
+    try:
+        with open(INVENTORY) as fh:
+            inv = json.load(fh)
+    except Exception:
+        return []
+    out, pending_hosts, ok_hosts = [], 0, 0
+    for h in (inv.get("hosts") or {}).values():
+        if not isinstance(h, dict) or h.get("error") or h.get("update_errors"):
+            continue
+        ok_hosts += 1
+        # rpm hosts: distinct advisories (labinventory keeps only installable ones); apt: -security updates
+        n = len({x.get("advisory") for x in h.get("security") or []}) + count(h.get("updates"), lambda u: u.get("security"))
+        pending_hosts += 1 if n else 0
+        out.append(("mikes_lab_security_pending", {"host": h.get("name", "?")}, n))
+    out.append(("mikes_lab_hosts_security_pending", {}, pending_hosts))
+    out.append(("mikes_lab_hosts_inventoried", {}, ok_hosts))
+    out.append(("mikes_lab_inventory_timestamp_seconds", {}, num(inv.get("collected_ts"))))
+    return out
+
+
 def render_metrics():
     body = []
     seen = []
@@ -250,6 +279,11 @@ def render_metrics():
             body.append("%s{%s} %s" % (name, lab, value))
             if name not in seen:
                 seen.append(name)
+    for name, labels, value in inventory_metrics():
+        lab = ",".join('%s="%s"' % (k, v) for k, v in labels.items())
+        body.append("%s{%s} %s" % (name, lab, value))
+        if name not in seen:
+            seen.append(name)
     head = []
     for name in seen:
         head.append("# HELP %s %s" % (name, HELP.get(name, "")))
