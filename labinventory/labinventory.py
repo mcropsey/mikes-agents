@@ -29,7 +29,8 @@ if command -v rpm >/dev/null 2>&1; then
   sec pm; echo rpm
   sec pkgs; rpm -qa --qf '%{NAME}\t%{EPOCHNUM}:%{VERSION}-%{RELEASE}\t%{ARCH}\n'
   O="-q --setopt=skip_if_unavailable=True"
-  sec updates; sudo -n timeout 400 dnf --setopt=skip_if_unavailable=True check-update 2>/tmp/.labinv.err
+  # --refresh: root's metadata cache can be hours old and hide new advisories (the later calls reuse it)
+  sec updates; sudo -n timeout 400 dnf --refresh --setopt=skip_if_unavailable=True check-update 2>/tmp/.labinv.err
   sec update_errors; grep -iE "error|fail|ignoring" /tmp/.labinv.err | sort -u | head -10
   sec security; sudo -n timeout 300 dnf $O updateinfo list --security 2>/dev/null
   sec security_cves; sudo -n timeout 300 dnf $O updateinfo list --security --with-cve 2>/dev/null | grep '^CVE-'
@@ -110,13 +111,21 @@ def parse(ip: str, name: str, out: str) -> dict:
             if len(parts) == 3 and "." in parts[0]:
                 host["updates"].append({"name": parts[0].rsplit(".", 1)[0], "version": parts[1], "repo": parts[2],
                                         "installed": host["packages"].get(parts[0].rsplit(".", 1)[0], "")})
+        # updateinfo also lists advisories for module streams that aren't enabled (e.g. nodejs 24 on a
+        # nodejs 22 host), which can never install; keep only those matching a pending update.
+        pending = {(u["name"], u["version"].split(":", 1)[-1]) for u in host["updates"]}
+
+        def installable(nevra: str) -> bool:
+            name, ver, rel = nevra.rsplit(".", 1)[0].rsplit("-", 2)
+            return (name, f"{ver.split(':', 1)[-1]}-{rel}") in pending
+
         for line in s.get("security", []):
             parts = line.split()
-            if len(parts) >= 3:
+            if len(parts) >= 3 and installable(parts[2]):
                 host["security"].append({"advisory": parts[0], "severity": parts[1].split("/")[0], "package": parts[2]})
         for line in s.get("security_cves", []):
             parts = line.split()
-            if len(parts) >= 3:
+            if len(parts) >= 3 and installable(parts[2]):
                 host["security_cves"].append({"cve": parts[0], "severity": parts[1].split("/")[0], "package": parts[2]})
     else:
         for line in s.get("updates", []):
