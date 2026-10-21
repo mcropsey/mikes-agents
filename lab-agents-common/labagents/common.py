@@ -19,7 +19,8 @@ MAIL_TO = os.environ.get("MAIL_TO", "mcropsey@gmail.com")
 DATA = Path(os.environ.get("DATA_DIR", "/data"))
 HOST = "192.168.1.98"
 
-# Lab host map, given to the models so they can name hosts properly.
+# Lab host map, given to the models so they can name hosts properly. The name column must be the exact
+# `host` label in Prometheus/Loki: models query with it (a wrong .105 name once caused a false "72h no logs")
 LAB_HOSTS = """\
 192.168.1.85  rasp5             Raspberry Pi 5, control node, Twingate
 192.168.1.98  hv-rocky-linux-1  observability hub (Prometheus/Grafana/Loki/Alertmanager), VulnNotes API, these agents
@@ -29,7 +30,7 @@ LAB_HOSTS = """\
 192.168.1.102 hv-rocky-linux-5  Noname sensor, MCP servers (crapi/noname/vampi), AI simulator
 192.168.1.103 hv-rocky-linux-6  RHCSA practice workstation
 192.168.1.104 hv-rocky-linux-7  RHCSA practice workstation
-192.168.1.105 utility.lab       RHCSA utility server (dnf repo mirror + NFS)
+192.168.1.105 utility           RHCSA utility server (dnf repo mirror + NFS)
 192.168.1.75  rk1               Raspberry Pi 5, microk8s node
 192.168.1.76  rk2               Raspberry Pi 5, microk8s node
 192.168.1.77  rk3               spare, RESERVED by the owner (powered off / down is expected)
