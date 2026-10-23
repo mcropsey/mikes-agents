@@ -5,5 +5,5 @@ After=network-online.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/podman run --rm --name secnews --env-file /opt/secnews/secnews.env -v /opt/secnews/data:/data:Z localhost/secnews:latest
+ExecStart=/usr/bin/podman run --rm --replace --name secnews --env-file /opt/secnews/secnews.env -v /opt/secnews/data:/data:Z localhost/secnews:latest
 TimeoutStartSec=30min

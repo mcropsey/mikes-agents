@@ -6,5 +6,5 @@ After=labinventory.service
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/podman run --rm --name patchwatch --network host --env-file /opt/labagents/labagents.env -v /opt/labagents/data:/data:z localhost/labagents:latest labagents.patchwatch
+ExecStart=/usr/bin/podman run --rm --replace --name patchwatch --network host --env-file /opt/labagents/labagents.env -v /opt/labagents/data:/data:z localhost/labagents:latest labagents.patchwatch
 TimeoutStartSec=45min

@@ -5,5 +5,5 @@ After=network-online.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/podman run --rm --name alertwatch-beat --network host --env-file /opt/labagents/labagents.env -v /opt/labagents/data:/data:z localhost/labagents:latest labagents.alertwatch --test
+ExecStart=/usr/bin/podman run --rm --replace --name alertwatch-beat --network host --env-file /opt/labagents/labagents.env -v /opt/labagents/data:/data:z localhost/labagents:latest labagents.alertwatch --test
 TimeoutStartSec=30min
