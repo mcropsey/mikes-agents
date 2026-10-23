@@ -68,7 +68,8 @@ cvewatch --no-email
 ```bash
 cvewatch                   # run; email only if something is (possibly) affected
 cvewatch --always-email    # email even on a quiet day
-cvewatch --hours 72        # catch up after a weekend
+cvewatch --hours 72        # explicit window (normally not needed: without --hours it
+                           # covers everything since the last successful emailed run)
 cvewatch --no-email
 ```
 

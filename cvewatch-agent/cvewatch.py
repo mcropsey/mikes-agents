@@ -7,6 +7,9 @@
 4. Emails only when something in the lab is (possibly) affected, unless --always-email.
 
 Usage: python -m labagents.cvewatch [--hours N] [--no-email] [--always-email] [--to ADDR]
+
+Without --hours the window starts where the last successful run's window ended (state/cvewatch.json),
+so a missed or failed run leaves no gap; at least 24h, at most NVD's 120-day limit.
 """
 import argparse
 import datetime as dt
@@ -16,11 +19,13 @@ import time
 
 import httpx
 
-from .common import LAB_HOSTS, MAIL_TO, Agent, card, e, load_inventory, log, page, save_report, send_mail, table
+from .common import DATA, LAB_HOSTS, MAIL_TO, Agent, card, e, load_inventory, log, page, save_report, send_mail, table
 
 NVD = "https://services.nvd.nist.gov/rest/json/cves/2.0"
 KEV = "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json"
 MAX_GROUPS = 15
+STATE = DATA / "state" / "cvewatch.json"
+MAX_HOURS = 120 * 24  # NVD rejects pubStartDate..pubEndDate ranges over 120 days
 
 # NVD product names that differ from package / image names.
 ALIASES = {
@@ -112,9 +117,20 @@ def build_index(inv: dict) -> dict:
     return index
 
 
-def fetch_nvd(client: httpx.Client, hours: int) -> list:
-    end = dt.datetime.now(dt.timezone.utc)
-    start = end - dt.timedelta(hours=hours)
+def window_start(end: dt.datetime, hours: int | None) -> dt.datetime:
+    """--hours if given, else the end of the last successful window (no gap after a missed run)."""
+    if hours:
+        return end - dt.timedelta(hours=hours)
+    start = end - dt.timedelta(hours=24)
+    try:
+        last = dt.datetime.fromisoformat(json.loads(STATE.read_text())["window_end"])
+        start = min(start, last)
+    except (OSError, ValueError, KeyError) as ex:
+        log(f"no usable state at {STATE} ({ex}); using last 24h")
+    return max(start, end - dt.timedelta(hours=MAX_HOURS))
+
+
+def fetch_nvd(client: httpx.Client, start: dt.datetime, end: dt.datetime) -> list:
     fmt = "%Y-%m-%dT%H:%M:%S.000Z"
     out, idx = [], 0
     while True:
@@ -266,7 +282,7 @@ def render(result: dict, groups: list, stats: dict, hours: int, n_cves: int, n_k
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--hours", type=int, default=24)
+    ap.add_argument("--hours", type=int, help="look-back window (default: since the last successful run, min 24h)")
     ap.add_argument("--no-email", action="store_true")
     ap.add_argument("--always-email", action="store_true", help="email even when nothing is affected")
     ap.add_argument("--to", default=MAIL_TO)
@@ -274,10 +290,14 @@ def main():
 
     inv, inv_warn = load_inventory()
     index = build_index(inv)
+    end = dt.datetime.now(dt.timezone.utc)
+    start = window_start(end, args.hours)
+    hours = round((end - start).total_seconds() / 3600)
+    log(f"window {start:%Y-%m-%d %H:%M} -> {end:%Y-%m-%d %H:%M} UTC ({hours}h)")
     with httpx.Client(timeout=120, follow_redirects=True, headers={"User-Agent": "cvewatch-agent/1.0"}) as client:
-        cves = fetch_nvd(client, args.hours)
+        cves = fetch_nvd(client, start, end)
         kev_all = client.get(KEV, headers={"User-Agent": "curl/7.76.1"}).json()["vulnerabilities"]
-    since = (dt.date.today() - dt.timedelta(days=max(2, args.hours // 24 + 1))).isoformat()
+    since = (dt.date.today() - dt.timedelta(days=max(2, hours // 24 + 1))).isoformat()
     kev = [v for v in kev_all if v.get("dateAdded", "") >= since]
     cands, stats = match(cves, kev, index, inv)
     log(f"{len(cves)} new CVEs, {len(kev)} KEV additions -> {stats['cves_matched']} matched "
@@ -292,17 +312,18 @@ def main():
     log(f"{len(hits)} affected/possibly, {len(result.get('findings', [])) - len(hits)} not affected")
 
     footer = agent.footer(f"inventory {inv['collected_at']}" + (f" ({inv_warn})" if inv_warn else ""))
-    body = render(result, cands, stats, args.hours, len(cves), len(kev), footer)
+    body = render(result, cands, stats, hours, len(cves), len(kev), footer)
     save_report("cvewatch", body, {"result": result, "groups": cands, "stats": stats})
-    if args.no_email:
-        return
-    if hits or args.always_email:
+    if not args.no_email and (hits or args.always_email):
         worst = next((f for f in hits if f.get("verdict") == "affected"), hits[0] if hits else None)
         subject = (f"CVE watch: {len(hits)} may affect the lab" + (f" ({worst.get('product', '')})" if worst else "")
                    if hits else "CVE watch: nothing affects the lab today")
         send_mail(subject, body, args.to)
-    else:
+    elif not args.no_email:
         log("nothing affects the lab; no email (use --always-email to send anyway)")
+    if not args.no_email:  # only once the report has gone out, so a failed or test run leaves no gap
+        STATE.parent.mkdir(parents=True, exist_ok=True)
+        STATE.write_text(json.dumps({"window_end": end.isoformat()}))
 
 
 if __name__ == "__main__":
