@@ -31,8 +31,9 @@ LAB_HOSTS = """\
 192.168.1.103 hv-rocky-linux-6  RHCSA practice workstation
 192.168.1.104 hv-rocky-linux-7  RHCSA practice workstation
 192.168.1.105 utility           RHCSA utility server (dnf repo mirror + NFS)
-192.168.1.90  ubuntu-1          Ubuntu 24.04 general purpose VM on the Hyper-V host (new)
-192.168.1.91  ubuntu-2          Ubuntu 24.04 general purpose VM on the Hyper-V host (new)
+192.168.1.91  ubuntu-1          Ubuntu 24.04 general purpose VM on the Hyper-V host (new)
+192.168.1.92  ubuntu-2          Ubuntu 24.04 general purpose VM on the Hyper-V host (new)
+192.168.1.93  ubuntu-3          Ubuntu 24.04 general purpose VM on the Hyper-V host (new)
 192.168.1.75  rk1               Raspberry Pi 5, microk8s node
 192.168.1.76  rk2               Raspberry Pi 5, microk8s node
 192.168.1.77  rk3               spare, RESERVED by the owner (powered off / down is expected)
